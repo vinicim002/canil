@@ -5,11 +5,22 @@
   --color-brown: #6a3515;
   --color-white: #fbf8f8;
   --color-body: #3d3d3d;
+  --color-glass-border: rgba(255, 255, 255, 0.1);
   --background-gradient-brown: linear-gradient(
-    180deg,
+    135deg,
     #6a3515 0%,
     #6a3515 38%,
     #a25121 69%,
     #e0712e 100%
   );
+}
+
+@utility bg-gradient-brown {
+  background: var(--background-gradient-brown);
+}
+
+@utility glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(40px);
+  border: 1px solid var(--color-glass-border);
 }
