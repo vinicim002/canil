@@ -1,0 +1,16 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
+@import "tailwindcss";
+@import "./theme.css";
+
+@font-face {
+  font-family: "CmasPlay";
+  src: url("/src/assets/fonts/CmasPlay.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+body {
+  color: #3d3d3d;
+  background-color: #fbf8f8;
+  font-family: "Montserrat", sans-serif;
+}

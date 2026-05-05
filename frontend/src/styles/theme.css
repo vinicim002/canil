@@ -1,0 +1,15 @@
+@theme {
+  --font-cmas-play: "CmasPlay", sans-serif;
+  --color-cream: #ffede2;
+  --color-orange: #e0712e;
+  --color-brown: #6a3515;
+  --color-white: #fbf8f8;
+  --color-body: #3d3d3d;
+  --background-gradient-brown: linear-gradient(
+    180deg,
+    #6a3515 0%,
+    #6a3515 38%,
+    #a25121 69%,
+    #e0712e 100%
+  );
+}
