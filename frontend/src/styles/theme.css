@@ -24,3 +24,15 @@
   backdrop-filter: blur(40px);
   border: 1px solid var(--color-glass-border);
 }
+
+@utility glass-brown {
+  background: rgba(106, 53, 21, 0.15);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(106, 53, 21, 0.25);
+}
+
+@utility glass-navbar {
+  background: rgba(251, 248, 248, 0.7);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(106, 53, 21, 0.1);
+}
