@@ -3,7 +3,7 @@ import coracaoImg from "../../assets/coracao.png";
 
 export function Hero() {
   return (
-    <section className="hero relative bg-cream flex items-center justify-center flex-col h-screen overflow-hidden mb-20">
+    <section className="hero relative bg-cream flex items-center justify-center flex-col h-screen overflow-hidden">
       <div className="hero-info flex flex-col items-center gap-8 justify-center z-10">
         <h1 className="text-5xl font-bold font-cmas-play text-brown">
           CANIL ALTO DA BELA VISTA

@@ -5,7 +5,9 @@ export function NossoCanil() {
     <section className="section-nosso-canil mx-36 py-20 flex items-center justify-between gap-5 mb-20">
       <div className="nosso-canil-info w-1/2 flex flex-col gap-6">
         <h2 className="font-cmas-play text-4xl text-brown">NOSSO CANIL</h2>
-        <h3 className="font-cmas-play text-3xl text-orange">CANIL ALTO DA BELA VISTA</h3>
+        <h3 className="font-cmas-play text-3xl text-orange">
+          CANIL ALTO DA BELA VISTA
+        </h3>
 
         <p className="text-base font-medium">
           Desde 2011, o Canil Alto da Bela Vista tem levado alegria e
