@@ -1,33 +1,59 @@
+import { Link } from "react-router-dom";
 import logoMarron from "../../assets/logoMarron.png";
 
 export function Navbar() {
   return (
     <nav className="navbar glass-navbar fixed top-0 left-0 right-0 z-50 py-4 px-36">
       <div className="navbar-inner flex flex-row items-center justify-between">
-        <div className="navbar-marca flex flex-row items-center gap-3">
+        <Link to="/" className="navbar-marca flex flex-row items-center gap-3">
           <div className="navbar-logo w-10 h-10 rounded-full bg-brown shrink-0">
-            <img src={logoMarron} alt="" />
+            <img src={logoMarron} alt="Logo Canil Alto da Bela Vista" />
           </div>
           <span className="font-cmas-play text-brown text-lg">
             Canil Alto da Bela Vista
           </span>
-        </div>
+        </Link>
 
         <ul className="navbar-links flex flex-row items-center gap-10">
-          <li className="text-body text-sm font-medium cursor-pointer hover:text-brown transition-colors">
-            Sobre o canil
+          <li>
+            <Link
+              to="/"
+              className="text-body text-sm font-medium hover:text-brown transition-colors"
+            >
+              Início
+            </Link>
           </li>
-          <li className="text-body text-sm font-medium cursor-pointer hover:text-brown transition-colors">
-            Nossos cães
+          <li>
+            <Link
+              to="/sobre"
+              className="text-body text-sm font-medium hover:text-brown transition-colors"
+            >
+              Sobre
+            </Link>
           </li>
-          <li className="text-body text-sm font-medium cursor-pointer hover:text-brown transition-colors">
-            Cuidados
+          <li>
+            <Link
+              to="/nossos-caes"
+              className="text-body text-sm font-medium hover:text-brown transition-colors"
+            >
+              Nossos cães
+            </Link>
           </li>
-          <li className="text-body text-sm font-medium cursor-pointer hover:text-brown transition-colors">
-            Entrega
+          <li>
+            <Link
+              to="/filhotes"
+              className="text-body text-sm font-medium hover:text-brown transition-colors"
+            >
+              Filhotes
+            </Link>
           </li>
-          <li className="text-body text-sm font-medium cursor-pointer hover:text-brown transition-colors">
-            FAQ
+          <li>
+            <Link
+              to="/contato"
+              className="text-body text-sm font-medium hover:text-brown transition-colors"
+            >
+              Contato
+            </Link>
           </li>
         </ul>
 
