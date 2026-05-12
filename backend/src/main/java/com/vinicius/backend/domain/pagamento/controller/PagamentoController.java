@@ -1,0 +1,72 @@
+package com.vinicius.backend.domain.pagamento.controller;
+
+import com.vinicius.backend.domain.pagamento.dto.PagamentoRequest;
+import com.vinicius.backend.domain.pagamento.dto.PagamentoResponse;
+import com.vinicius.backend.domain.pagamento.enums.StatusPagamento;
+import com.vinicius.backend.domain.pagamento.service.PagamentoService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/api/pagamentos")
+@RequiredArgsConstructor
+public class PagamentoController {
+
+    private final PagamentoService pagamentoService;
+
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<PagamentoResponse> criar(
+            @RequestBody @Valid PagamentoRequest request
+    ) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(pagamentoService.criar(request));
+    }
+
+    @GetMapping("/reserva/{reservaId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<PagamentoResponse>> listarPorReserva(
+            @PathVariable UUID reservaId
+    ) {
+        return ResponseEntity.ok(pagamentoService.listarPorReserva(reservaId));
+    }
+
+    @GetMapping("/status/{status}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<PagamentoResponse>> listarPorStatus(
+            @PathVariable StatusPagamento status
+    ) {
+        return ResponseEntity.ok(pagamentoService.listarPorStatus(status));
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<PagamentoResponse> buscarPorId(@PathVariable UUID id) {
+        return ResponseEntity.ok(pagamentoService.buscarPorId(id));
+    }
+
+    @PatchMapping("/{id}/aprovar")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<PagamentoResponse> aprovar(@PathVariable UUID id) {
+        return ResponseEntity.ok(pagamentoService.aprovar(id));
+    }
+
+    @PatchMapping("/{id}/recusar")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<PagamentoResponse> recusar(@PathVariable UUID id) {
+        return ResponseEntity.ok(pagamentoService.recusar(id));
+    }
+
+    @PatchMapping("/{id}/estornar")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<PagamentoResponse> estornar(@PathVariable UUID id) {
+        return ResponseEntity.ok(pagamentoService.estornar(id));
+    }
+}

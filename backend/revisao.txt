@@ -1,0 +1,177 @@
+Especificação Técnica: Fluxo de Aquisição e Cadastro de Clientes - Canil Salsicha
+1. Visão Geral
+Sistema de e-commerce com curadoria manual. O acesso à área logada (Painel do Cliente) é restrito a compradores que passaram por uma entrevista via WhatsApp e confirmaram o pagamento da reserva.
+
+2. Modelagem de Dados (Entidades)
+A. Cliente (Cliente.java)
+id: UUID (PK)
+
+nome: String
+
+email: String (Unique)
+
+whatsapp: String
+
+cpf: String (Unique)
+
+status: Enum (PROSPECTO, AUTORIZADO, ATIVO, BLOQUEADO)
+
+active: Boolean (Default: false)
+
+tokenAtivacao: UUID (Para link de e-mail)
+
+dataCriacao/Atualizacao: Timestamps
+
+B. Reserva (Reserva.java)
+id: Long (PK)
+
+cliente: ManyToOne (Cliente)
+
+cao: OneToOne (Cao)
+
+status: Enum (AGUARDANDO_CONTATO, PAGAMENTO_PENDENTE, CONFIRMADA, CANCELADA)
+
+valorReserva: BigDecimal
+
+3. Fluxo de Processo (Passo a Passo)
+Fase 1: Intenção de Compra (Público)
+Ação: Usuário clica em "Reservar" no catálogo de salsichas (Next.js).
+
+Input: Formulário simplificado (Nome, Email, WhatsApp).
+
+Backend:
+
+Cria registro de Cliente como PROSPECTO.
+
+Cria Reserva vinculada com status AGUARDANDO_CONTATO.
+
+Integração: O WhatsappService dispara mensagem automática para o dono do canil com os dados do cliente e o link direto para o chat do interessado.
+
+Fase 2: Curadoria e Autorização (Privado/Admin)
+Ação: Dono do canil conversa com o cliente via WhatsApp.
+
+Ação: No painel admin, o dono clica em "Autorizar Venda".
+
+Backend:
+
+Muda status do cliente para AUTORIZADO.
+
+Muda status da reserva para PAGAMENTO_PENDENTE.
+
+Envia e-mail automático com o link para o gateway de pagamento.
+
+Fase 3: Confirmação e Ativação (Transacional)
+Ação: Cliente realiza o pagamento (Stripe/Mercado Pago/Pix).
+
+Backend (Webhook):
+
+Valida a transação.
+
+Gera um tokenAtivacao.
+
+Envia e-mail de "Boas-vindas" com link: [meusite.com/ativar-conta?token=UUID](https://meusite.com/ativar-conta?token=UUID).
+
+Fase 4: Finalização do Cadastro (Área do Cliente)
+Ação: Cliente acessa o link, preenche o restante dos dados (Endereço, CPF) e define uma senha.
+
+Backend:
+
+Valida o token.
+
+Muda status para ATIVO e active para true.
+
+Libera acesso às rotas de /documentos, /vacinacao e /timeline.
+
+4. Requisitos de Integração
+Email: Spring Boot Starter Mail (Gmail SMTP ou SendGrid).
+
+WhatsApp: Integração via API (Evolution API ou Twilio) ou redirecionamento dinâmico via URL.
+
+Segurança: Spring Security com JWT. Rotas de /api/public/ liberadas; /api/cliente/ exigindo Role.CLIENTE e active=true.
+
+5. Regras de Negócio Importantes
+Unicidade: Um "salsicha" (Cão) só pode estar vinculado a uma reserva ativa por vez.
+
+Persistência: Se o pagamento não for identificado em X horas, o status do Cão volta para "Disponível".
+
+Privacidade: Documentos e histórico de vacinação só são visíveis se o ID do Cliente logado coincidir com o dono do animal.
+
+==============================================================================
+
+Dica de "Feature" para o seu Sistema:
+Como você tem o campo proximaDose, você pode criar um Scheduled Task no Spring
+(um processo que roda todo dia à meia-noite) que verifica quem tem vacina vencendo nos próximos
+7 dias e dispara um alerta automático via WhatsApp para o dono do canil ou para o cliente que já comprou a salsicha.
+
+====================================================================================
+
+1. Spring Security (O Motor)
+É a parte mais complexa. Você deve estudar o conceito de Security Filter Chain (a corrente de filtros) e como o Spring gerencia o contexto de autenticação.
+
+O que pesquisar: "Spring Security Architecture", "Servlet Authentication Architecture".
+
+Doc Oficial: Spring Security Reference
+
+Foco: Entender o SecurityContextHolder e o UsernamePasswordAuthenticationToken.
+
+2. JWT & JJWT Library (A Identidade)
+Como você usou a biblioteca JJWT (io.jsonwebtoken), vale a pena entender como os tokens são assinados e o que é o padrão RFC 7519.
+
+O que pesquisar: "JWT.io Introduction", "JJWT Documentation".
+
+Site para testes: JWT.io (ótimo para colar seu token e ver as Claims que criamos).
+
+Foco: Diferença entre Payload, Header e Signature.
+
+3. Hibernate & JPA (O Banco)
+Como usamos Refresh Token e PerfilCliente com relacionamentos @OneToOne e @ManyToOne, você precisa entender como o Hibernate gerencia o carregamento desses dados.
+
+O que pesquisar: "JPA Entity Lifecycle", "Lazy vs Eager Loading", "Hibernate @Modifying queries".
+
+Doc Oficial: Spring Data JPA
+
+Foco: Por que usamos FetchType.LAZY e como o @Transactional ajuda a manter a conexão aberta.
+
+4. O Padrão OAuth2 & OIDC (O Conceito Geral)
+Embora não estejamos usando um servidor de autorização externo (como Google ou Keycloak), seguimos o fluxo de "Resource Owner Password Credentials" com Refresh Token.
+
+O que pesquisar: "OAuth 2.0 Refresh Token Flow", "Token Rotation strategy".
+
+Foco: Por que o Refresh Token fica no banco e o Access Token não.
+
+====================================================================================
+
+{
+  "nome": "Vinicius Administrador",
+  "email": "admin@canil.com",
+  "senha": "sua_senha_segura",
+  "telefone": "11999999999",
+  "role": "ADMIN"
+}
+
+{
+  "email": "admin@canil.com",
+  "senha": "sua_senha_segura"
+}
+
+{
+    "accessToken": "eyJhbGciOiJIUzM4NCJ9.eyJyb2xlIjoiQ0xJRU5URSIsIm5vbWUiOiJWaW5pY2l1cyBBZG1pbmlzdHJhZG9yIiwic3ViIjoiYWRtaW5AY2FuaWwuY29tIiwiaWF0IjoxNzc4NTQyNjgxLCJleHAiOjE3Nzg1NDM1ODF9.kVm8Sl_O0vy8yzzsK4qOLOfUiAmVLX0_qWo0lDnRrsV_8Ju9eiHiNb1UzCP1NImF",
+    "refreshToken": "45d6a372-1b96-4666-8b5f-02269eb2f188",
+    "usuarioId": "fd47b931-21d0-49ea-b738-ec65b0a34717",
+    "nome": "Vinicius Administrador",
+    "email": "admin@canil.com",
+    "role": "CLIENTE"
+}
+
+{
+  "nome": "Thor",
+  "tipoPelo": "LISO",
+  "tamanho": "MINIATURA",
+  "genero": "MACHO",
+  "status": "DISPONIVEL",
+  "dataNascimento": "2026-03-01",
+  "cor": "CARAMELO",
+  "descricao": "Filhote dócil e brincalhão",
+  "destaque": true,
+  "preco": 2500.00
+}
