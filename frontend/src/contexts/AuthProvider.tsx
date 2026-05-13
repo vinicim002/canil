@@ -1,5 +1,9 @@
 import { useState, type ReactNode } from "react";
-import { authService, type LoginRequest, type LoginResponse } from "../services/authService";
+import {
+  authService,
+  type LoginRequest,
+  type LoginResponse,
+} from "../services/authService";
 import { AuthContext } from "./AuthContext";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -19,7 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const [loading] = useState(false);
 
-  async function login(data: LoginRequest) {
+  async function login(data: LoginRequest): Promise<LoginResponse> {
     const response = await authService.login(data);
 
     localStorage.setItem("accessToken", response.accessToken);
@@ -30,6 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("role", response.role);
 
     setUsuario(response);
+    return response;
   }
 
   function logout() {
