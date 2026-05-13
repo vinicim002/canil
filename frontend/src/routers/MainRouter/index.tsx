@@ -2,25 +2,47 @@ import { Route, Routes } from "react-router-dom";
 import { Home } from "../../pages/Home";
 import { SobrePage } from "../../pages/SobrePage";
 import { NossosCaesPage } from "../../pages/NossosCaesPage";
-import { FilhotesPage } from "../../pages/FilhotesPage";
+import { MainLayout } from "../../template/MainLayout";
 import { ContatoPage } from "../../pages/ContatoPage";
-import { NotFound } from "../../pages/NotFound";
-import { AdminPage } from "../../pages/AdminPage";
+import { FilhotesPage } from "../../pages/FilhotesPage";
 import { LoginPage } from "../../pages/LoginPage";
+import { ProtectedRoute } from "../../components/ProtectedRoute";
 import { ClientePage } from "../../pages/ClientePage";
+import { AdminPage } from "../../pages/AdminPage";
+import { NotFound } from "../../pages/NotFound";
+// imports das páginas...
 
 export function MainRouter() {
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/sobre" element={<SobrePage />} />
-      <Route path="/nossos-caes" element={<NossosCaesPage />} />
-      <Route path="/filhotes" element={<FilhotesPage />} />
-      <Route path="/contato" element={<ContatoPage />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/admin/*" element={<AdminPage />} />
-      <Route path="/cliente" element={<ClientePage />} />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+    <MainLayout>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/sobre" element={<SobrePage />} />
+        <Route path="/nossos-caes" element={<NossosCaesPage />} />
+        <Route path="/filhotes" element={<FilhotesPage />} />
+        <Route path="/contato" element={<ContatoPage />} />
+        <Route path="/login" element={<LoginPage />} />
+
+        <Route
+          path="/cliente"
+          element={
+            <ProtectedRoute>
+              <ClientePage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/*"
+          element={
+            <ProtectedRoute adminOnly>
+              <AdminPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </MainLayout>
   );
 }

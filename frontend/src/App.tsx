@@ -1,13 +1,13 @@
 import { BrowserRouter } from "react-router-dom";
 import { MainRouter } from "./routers/MainRouter";
-import { MainLayout } from "./template/MainLayout";
+import { AuthProvider } from "./contexts/AuthProvider";
 
 export function App() {
   return (
     <BrowserRouter>
-      <MainLayout>
+      <AuthProvider>
         <MainRouter />
-      </MainLayout>
+      </AuthProvider>
     </BrowserRouter>
   );
 }
