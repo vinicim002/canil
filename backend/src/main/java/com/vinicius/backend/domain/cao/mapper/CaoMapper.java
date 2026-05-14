@@ -34,12 +34,16 @@ public class CaoMapper {
                 cao.getGenero(),
                 cao.getStatus(),
                 cao.getDataNascimento(),
-                cao.getCor() != null ? cao.getCor().name() : null, // <--- ADICIONE .name() AQUI
+                cao.getCor() != null ? cao.getCor().name() : null,
                 cao.getPedigree(),
                 cao.getDescricao(),
                 cao.getDestaque(),
                 cao.getPai() != null ? toPaisResponse(cao.getPai()) : null,
                 cao.getMae() != null ? toPaisResponse(cao.getMae()) : null,
+                // MAPEAMENTO DAS IMAGENS AQUI:
+                cao.getImagens() != null ? cao.getImagens().stream()
+                                           .map(this::toImagemResponse)
+                                           .toList() : null,
                 cao.getCriadoEm()
         );
     }
@@ -50,6 +54,18 @@ public class CaoMapper {
                 cao.getNome(),
                 cao.getTipoPelo(),
                 cao.getGenero()
+        );
+    }
+
+    private com.vinicius.backend.domain.imagem.dto.ImagemResponse toImagemResponse(com.vinicius.backend.domain.imagem.model.Imagem imagem) {
+        return new com.vinicius.backend.domain.imagem.dto.ImagemResponse(
+                imagem.getId(),
+                imagem.getCao().getId(), // caoId
+                imagem.getUrl(),
+                imagem.getPublicId(),
+                imagem.getCapa(),
+                imagem.getOrdem(),
+                imagem.getCriadoEm()
         );
     }
 }
