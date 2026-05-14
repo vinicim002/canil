@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -45,51 +46,40 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // Desabilita CSRF (apropriado para APIs JWT)
                 .csrf(AbstractHttpConfigurer::disable)
-
-                // Habilita CORS com configurações dinâmicas
                 .cors(Customizer.withDefaults())
-
-                // Gerenciamento de sessão stateless (apropriado para JWT)
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-
-                // Configuração de autorização por endpoint
                 .authorizeHttpRequests(auth -> auth
-                        // Endpoints públicos de autenticação
-                        .requestMatchers("/api/auth/login").permitAll()
-                        .requestMatchers("/api/auth/register").permitAll()
-                        .requestMatchers("/api/auth/refresh").permitAll()
+                        // 1. ENDPOINTS DE AUTENTICAÇÃO (PÚBLICOS)
+                        .requestMatchers("/api/auth/**").permitAll()
 
-                        // Endpoint de criação de novo usuário (público - considere remover se não desejado)
-                        .requestMatchers("POST", "/api/usuarios").permitAll()
-
-                        // Endpoints públicos de leitura (GET) para cães
-                        // Descomente se quiser que a listagem de cães seja pública:
-                        // .requestMatchers("GET", "/api/caes/**").permitAll()
-
-                        // Health check e info endpoints (se existirem)
-                        .requestMatchers("/api/health").permitAll()
-                        .requestMatchers("/api/info").permitAll()
+                        // 2. DOCUMENTAÇÃO E MONITORAMENTO (PÚBLICOS)
+                        .requestMatchers("/api/health", "/api/info").permitAll()
                         .requestMatchers(
-                                "/v3/api-docs/**",          // Documentação em JSON/YAML
-                                "/v3/api-docs.yaml",        // Documentação em YAML específica
-                                "/swagger-ui/**",           // Recursos da interface (JS, CSS, Imagens)
-                                "/swagger-ui.html",         // Página principal da interface
-                                "/swagger-resources/**",    // Recursos adicionais se houver
-                                "/webjars/**"               // Bibliotecas web externas
+                                "/v3/api-docs/**",
+                                "/v3/api-docs.yaml",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/swagger-resources/**",
+                                "/webjars/**"
                         ).permitAll()
 
-                        // Qualquer outra requisição precisa estar autenticada
+                        // 3. REGRAS DE NEGÓCIO ESPECÍFICAS
+                        // Cadastro de usuário
+                        .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
+
+                        // Cães: Leitura pública, Escrita autenticada
+                        .requestMatchers(HttpMethod.GET, "/api/caes/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/caes/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/caes/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/caes/**").authenticated()
+
+                        // 4. REGRA GERAL (SEMPRE POR ÚLTIMO)
                         .anyRequest().authenticated()
                 )
-
-                // Define o provider de autenticação
                 .authenticationProvider(authenticationProvider())
-
-                // Adiciona o filtro JWT antes do filtro padrão de autenticação
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
