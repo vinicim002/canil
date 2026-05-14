@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { DogCard } from "../../components/DogCard";
 import type { CaoResponse } from "../../services/caoService/caoResponse";
 import { caoService } from "../../services/caoService/caoService";
+import type { ImagemResponse } from "../../services/imageService/ImagemResponse";
 
 export function NossosCaesPage() {
   const [reprodutores, setReprodutores] = useState<CaoResponse[]>([]);
@@ -89,13 +90,21 @@ export function NossosCaesPage() {
               viewport={{ once: true, margin: "-50px" }}
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
             >
-              {reprodutores.map((cao) => (
-                <DogCard
-                  key={cao.id}
-                  name={cao.nome}
-                  description={`${cao.tipoPelo} • ${cao.tamanho}`}
-                />
-              ))}
+              {reprodutores.map((cao) => {
+                // Apenas adicione o tipo na variável 'img'
+                const imagemCapa = cao.imagens?.find(
+                  (img: ImagemResponse) => img.capa === true,
+                );
+
+                return (
+                  <DogCard
+                    key={cao.id}
+                    name={cao.nome}
+                    description={`${cao.tipoPelo} • ${cao.tamanho}`}
+                    imageUrl={imagemCapa?.url}
+                  />
+                );
+              })}
             </motion.div>
           </section>
         )}
@@ -115,13 +124,21 @@ export function NossosCaesPage() {
               viewport={{ once: true, margin: "-50px" }}
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
             >
-              {matrizes.map((cao) => (
-                <DogCard
-                  key={cao.id}
-                  name={cao.nome}
-                  description={`${cao.tipoPelo} • ${cao.tamanho}`}
-                />
-              ))}
+              {matrizes.map((cao) => {
+                // Apenas adicione o tipo na variável 'img'
+                const imagemCapa = cao.imagens?.find(
+                  (img: ImagemResponse) => img.capa === true,
+                );
+
+                return (
+                  <DogCard
+                    key={cao.id}
+                    name={cao.nome}
+                    description={`${cao.tipoPelo} • ${cao.tamanho}`}
+                    imageUrl={imagemCapa?.url}
+                  />
+                );
+              })}
             </motion.div>
           </section>
         )}

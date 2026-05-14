@@ -4,11 +4,36 @@ const BASE_URL = "http://localhost:8080/api";
 
 async function handleRequest<T>(
   url: string,
-  options?: RequestInit,
+  options: RequestInit = {}, // Definido valor padrão para evitar erros de undefined
 ): Promise<T> {
-  const response = await fetch(`${BASE_URL}${url}`, options);
+  // 1. Pegar o token correto (accessToken)
+  const token = localStorage.getItem("accessToken");
+
+  const headers = new Headers(options.headers);
+
+  // 2. Injetar o Token se existir
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+
+  // 3. Configurar Content-Type apenas se NÃO for upload de arquivo
+  // O FormData precisa que o navegador defina o boundary automaticamente
+  if (!(options.body instanceof FormData) && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+
+  const response = await fetch(`${BASE_URL}${url}`, {
+    ...options,
+    headers,
+  });
 
   if (!response.ok) {
+    // Log para ajudar no debug
+    if (response.status === 403) {
+      console.error(
+        "403 Forbidden no imagemService: Token inválido ou rota bloqueada no backend.",
+      );
+    }
     throw new Error(`Erro na requisição: ${response.status}`);
   }
 
@@ -28,9 +53,8 @@ export const imagemService = {
 
     return handleRequest<ImagemResponse>(`/imagens/caes/${caoId}`, {
       method: "POST",
-      // IMPORTANTE: Não passamos headers de Content-Type aqui.
-      // O fetch identifica o FormData e configura o boundary sozinho.
       body: formData,
+      // Note: Não passamos headers aqui, o handleRequest cuida disso agora
     });
   },
 

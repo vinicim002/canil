@@ -7,7 +7,7 @@ async function handleRequest<T>(
   url: string,
   options: RequestInit = {}, // Definimos um valor padrão vazio
 ): Promise<T> {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("accessToken");
 
   // 1. Criamos um objeto de Headers combinando os existentes com os novos
   const headers = new Headers(options.headers);

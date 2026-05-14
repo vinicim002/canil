@@ -1,3 +1,5 @@
+import type { ImagemResponse } from "../imageService/ImagemResponse";
+
 export interface CaoResponse {
   id: string;
   nome: string;
@@ -12,5 +14,6 @@ export interface CaoResponse {
   destaque: boolean;
   pai: { id: string; nome: string } | null;
   mae: { id: string; nome: string } | null;
+  imagens: ImagemResponse[];
   criadoEm: string;
 }
