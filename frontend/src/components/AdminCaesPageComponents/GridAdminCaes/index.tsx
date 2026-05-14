@@ -1,13 +1,24 @@
+import { motion } from "framer-motion";
 import type { CaoResponse } from "../../../services/caoService/caoResponse";
 import type { ImagemResponse } from "../../../services/imageService/ImagemResponse";
 
 interface GridAdminCaesProps {
   handleDeletar: (id: string) => void;
-  abrirFotos: (cao: CaoResponse) => void; // Tipo corrigido
-  abrirEditar: (cao: CaoResponse) => void; // Tipo corrigido
-  caesFiltrados: CaoResponse[]; // Tipo corrigido
+  abrirFotos: (cao: CaoResponse) => void;
+  abrirEditar: (cao: CaoResponse) => void;
+  caesFiltrados: CaoResponse[];
   carregando: boolean;
 }
+
+// Variantes para a animação de entrada dos cards
+const cardVariants = {
+  hidden: { opacity: 0, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.3 },
+  },
+};
 
 export function GridAdminCaes({
   handleDeletar,
@@ -19,78 +30,94 @@ export function GridAdminCaes({
   return (
     <>
       {carregando ? (
-        <div className="flex items-center justify-center py-20">
-          <span className="text-body/50 font-medium">Carregando...</span>
+        <div className="flex flex-col items-center justify-center py-32 gap-4">
+          <div className="w-12 h-12 border-4 border-orange/20 border-t-orange rounded-full animate-spin" />
+          <span className="text-brown/50 font-bold animate-pulse">
+            Carregando cães...
+          </span>
         </div>
       ) : caesFiltrados.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 gap-3">
+        <div className="flex flex-col items-center justify-center py-20 gap-3 bg-white rounded-3xl border border-dashed border-brown/20">
           <span className="text-5xl">🐾</span>
-          <span className="text-body/50 font-medium">
-            Nenhum cão encontrado.
+          <span className="text-brown/50 font-semibold text-center px-4">
+            Nenhum cão encontrado com esses filtros.
           </span>
         </div>
       ) : (
-        <div className="grid grid-cols-4 gap-6">
+        /* Grid Responsivo: 1 col no mobile, 2 no tablet, 3 no notebook, 4 em telas grandes */
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {caesFiltrados.map((cao) => {
-            // BUSCA A CAPA AQUI DENTRO DO MAP
             const imagemCapa = cao.imagens?.find(
               (img: ImagemResponse) => img.capa,
             );
 
             return (
-              <div
+              <motion.div
                 key={cao.id}
-                className="cao-card bg-white rounded-2xl border border-brown/10 overflow-hidden flex flex-col shadow-sm hover:shadow-md transition-shadow"
+                variants={cardVariants}
+                whileHover={{ y: -5 }}
+                className="cao-card bg-white rounded-[2rem] border border-brown/10 overflow-hidden flex flex-col shadow-sm hover:shadow-xl transition-all duration-300"
               >
+                {/* Container da Foto */}
                 <div className="cao-card-foto w-full aspect-square bg-cream relative overflow-hidden">
                   {imagemCapa ? (
                     <img
                       src={imagemCapa.url}
                       alt={cao.nome}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                     />
                   ) : (
                     <div className="w-full h-full bg-brown/5 flex items-center justify-center">
-                      <span className="text-5xl opacity-20">🐾</span>
+                      <span className="text-6xl opacity-10">🐾</span>
+                    </div>
+                  )}
+
+                  {/* Badge de Destaque */}
+                  {cao.destaque && (
+                    <div className="absolute top-4 right-4 bg-orange text-white text-[10px] font-black px-3 py-1 rounded-full uppercase shadow-lg">
+                      Destaque
                     </div>
                   )}
                 </div>
 
-                <div className="p-4 flex flex-col gap-3 flex-1">
+                <div className="p-5 flex flex-col gap-4 flex-1">
                   <div className="flex flex-col gap-1">
-                    <span className="font-cmas-play text-brown text-lg font-bold leading-tight">
+                    <span className="font-cmas-play text-brown text-xl font-bold leading-tight">
                       {cao.nome}
                     </span>
-                    <span className="text-orange text-[10px] font-bold uppercase tracking-wider">
-                      {cao.tipoPelo} • {cao.tamanho} • {cao.genero}
-                    </span>
-                    {cao.cor && (
-                      <span className="text-body/60 text-xs">{cao.cor}</span>
-                    )}
+                    <div className="flex flex-wrap gap-1">
+                      <span className="bg-orange/10 text-orange text-[10px] font-bold px-2 py-0.5 rounded-md uppercase">
+                        {cao.tipoPelo}
+                      </span>
+                      <span className="bg-brown/5 text-brown/60 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase">
+                        {cao.tamanho}
+                      </span>
+                    </div>
                   </div>
 
+                  {/* Ações */}
                   <div className="flex flex-row gap-2 mt-auto">
                     <button
                       onClick={() => abrirFotos(cao)}
-                      className="flex-1 bg-cream text-brown text-xs font-semibold py-2 rounded-xl hover:bg-brown/10 transition-colors cursor-pointer"
+                      className="flex-1 bg-cream text-brown text-xs font-bold py-3 rounded-2xl hover:bg-brown/10 transition-colors cursor-pointer"
                     >
                       📷 Fotos
                     </button>
                     <button
                       onClick={() => abrirEditar(cao)}
-                      className="flex-1 bg-brown text-white text-xs font-semibold py-2 rounded-xl hover:bg-orange transition-colors cursor-pointer"
+                      className="flex-1 bg-brown text-white text-xs font-bold py-3 rounded-2xl hover:bg-orange transition-colors cursor-pointer"
                     >
                       ✏️ Editar
                     </button>
                     <button
                       onClick={() => handleDeletar(cao.id)}
-                      className="bg-red-50 text-red-500 text-xs font-medium py-2 px-3 rounded-xl hover:bg-red-100 transition-colors cursor-pointer"
+                      className="bg-red-50 text-red-500 text-xs font-bold py-3 px-4 rounded-2xl hover:bg-red-500 hover:text-white transition-all cursor-pointer"
                     >
                       🗑️
                     </button>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>

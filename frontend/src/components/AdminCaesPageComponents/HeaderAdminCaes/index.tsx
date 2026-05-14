@@ -1,3 +1,5 @@
+import { motion } from "framer-motion";
+
 interface HeaderAdminCaesProps {
   abrirAdicionar: () => void;
   quantidadeCaes: number;
@@ -8,19 +10,30 @@ export function HeaderAdminCaes({
   quantidadeCaes,
 }: HeaderAdminCaesProps) {
   return (
-    <div className="flex flex-row items-center justify-between">
-      <div className="flex flex-col gap-1">
-        <h1 className="font-cmas-play text-brown text-3xl">Caes</h1>
-        <p className="text-body/50 text-sm font-medium">
-          {quantidadeCaes} cães cadastrados
-        </p>
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* Título e Contador */}
+      <div className="flex flex-col gap-0.5">
+        <h1 className="font-cmas-play text-brown text-2xl md:text-3xl font-bold">
+          Cães
+        </h1>
+        <div className="flex items-center gap-2">
+          <p className="text-body/60 text-xs md:text-sm font-medium">
+            {quantidadeCaes}{" "}
+            {quantidadeCaes === 1 ? "cão cadastrado" : "cães cadastrados"}
+          </p>
+        </div>
       </div>
-      <button
+
+      {/* Botão com animação de escala e responsividade */}
+      <motion.button
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
         onClick={abrirAdicionar}
-        className="bg-brown text-white font-medium py-2.5 px-6 rounded-full hover:bg-orange transition-colors cursor-pointer text-sm"
+        className="bg-brown text-white font-bold py-3 px-6 md:py-2.5 md:px-8 rounded-2xl md:rounded-full hover:bg-orange transition-all duration-300 cursor-pointer text-sm shadow-sm hover:shadow-md flex items-center justify-center gap-2"
       >
-        + Adicionar cão
-      </button>
+        <span className="text-lg">+</span>
+        Adicionar cão
+      </motion.button>
     </div>
   );
 }
