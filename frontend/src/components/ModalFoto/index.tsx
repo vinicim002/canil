@@ -1,6 +1,5 @@
-import type { CaoResponse } from "../../services/caoService";
-import type { ImagemResponse } from "../../services/imagemService";
-
+import type { CaoResponse } from "../../services/caoService/caoService";
+import type { ImagemResponse } from "../../services/imageService/imagemService";
 
 interface ModalFotoProps {
   modalTipo: "fotos" | null;

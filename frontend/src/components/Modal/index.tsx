@@ -1,4 +1,4 @@
-import type { CaoRequest } from "../../services/caoService";
+import type { CaoRequest } from "../../services/caoService/caoService";
 
 interface ModalProps {
   handleSalvar: (e: React.FormEvent) => void;

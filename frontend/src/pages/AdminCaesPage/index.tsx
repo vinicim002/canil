@@ -1,18 +1,15 @@
 import { useState, useEffect } from "react";
-import {
-  caoService,
-  type CaoRequest,
-  type CaoResponse,
-} from "../../services/caoService";
-import {
-  imagemService,
-  type ImagemResponse,
-} from "../../services/imagemService";
+
 import { HeaderAdminCaes } from "../../components/AdminCaesPageComponents/HeaderAdminCaes";
 import { FiltroAdminCaes } from "../../components/AdminCaesPageComponents/FiltrosAdminCaes";
 import { GridAdminCaes } from "../../components/AdminCaesPageComponents/GridAdminCaes";
 import { Modal } from "../../components/Modal";
 import { ModalFoto } from "../../components/ModalFoto";
+import type { CaoRequest } from "../../services/caoService/caoRequest";
+import type { CaoResponse } from "../../services/caoService/caoResponse";
+import type { ImagemResponse } from "../../services/imageService/ImagemResponse";
+import { caoService } from "../../services/caoService/caoService";
+import { imagemService } from "../../services/imageService/imagemService";
 
 type ModalTipo = "adicionar" | "editar" | "fotos" | null;
 
@@ -214,7 +211,9 @@ export function AdminCaesPage() {
 
       {/* Modal Adicionar/Editar */}
       <Modal
-        modalTipo={modalTipo === "adicionar" || modalTipo === "editar" ? modalTipo : null}
+        modalTipo={
+          modalTipo === "adicionar" || modalTipo === "editar" ? modalTipo : null
+        }
         handleSalvar={handleSalvar}
         fecharModal={fecharModal}
         form={form}
@@ -224,25 +223,24 @@ export function AdminCaesPage() {
         TIPOS_PELO={TIPOS_PELO}
         TAMANHOS={TAMANHOS}
         GENEROS={GENEROS}
-        STATUS={STATUS} 
+        STATUS={STATUS}
       />
-
 
       {/* Modal Fotos */}
       <ModalFoto
-      modalTipo={modalTipo === "fotos" ? "fotos" : null}
-      caoSelecionado={caoSelecionado}
-      fecharModal={fecharModal}
-      erro={erro}
-      imagens={imagens}
-      setUploadFile={setUploadFile}
-      uploadFile={uploadFile}
-      uploadCapa={uploadCapa}
-      setUploadCapa={setUploadCapa}
-      handleUpload={handleUpload}
-      uploadCarregando={uploadCarregando}
-      handleDefinirCapa={(imagemId) => handleDefinirCapa(imagemId)}
-      handleDeletarImagem={(imagemId) => handleDeletarImagem(imagemId)} 
+        modalTipo={modalTipo === "fotos" ? "fotos" : null}
+        caoSelecionado={caoSelecionado}
+        fecharModal={fecharModal}
+        erro={erro}
+        imagens={imagens}
+        setUploadFile={setUploadFile}
+        uploadFile={uploadFile}
+        uploadCapa={uploadCapa}
+        setUploadCapa={setUploadCapa}
+        handleUpload={handleUpload}
+        uploadCarregando={uploadCarregando}
+        handleDefinirCapa={(imagemId) => handleDefinirCapa(imagemId)}
+        handleDeletarImagem={(imagemId) => handleDeletarImagem(imagemId)}
       />
     </div>
   );
