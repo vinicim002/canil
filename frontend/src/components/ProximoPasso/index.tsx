@@ -64,7 +64,7 @@ export function ProximoPasso() {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.6, delay: 0.1 }}
           >
-            Pronto para dar o próximo passo?
+            Pronto para dar o proximo passo?
           </motion.h3>
 
           <motion.h2
@@ -75,8 +75,8 @@ export function ProximoPasso() {
             transition={{ duration: 0.6, delay: 0.2 }}
           >
             Seu novo <br className="hidden md:block" /> melhor amigo{" "}
-            <br className="hidden md:block" /> está{" "}
-            <span className="text-orange">esperando por você</span>
+            <br className="hidden md:block" /> esta{" "}
+            <span className="text-orange">esperando por voce</span>
           </motion.h2>
 
           <motion.p

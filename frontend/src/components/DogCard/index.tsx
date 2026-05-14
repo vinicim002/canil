@@ -8,37 +8,56 @@ const itemVariants = {
 interface DogCardProps {
   name: string;
   description: string;
-  imageUrl?: string; // Propriedade para a URL da imagem
+  imageUrl?: string;
 }
 
 export function DogCard({ name, description, imageUrl }: DogCardProps) {
   return (
     <motion.div
       variants={itemVariants}
-      whileHover={{ y: -8 }}
-      className="nossos-caes-card flex flex-col gap-3 group cursor-pointer"
+      whileHover={{ y: -10 }}
+      className="flex flex-col gap-5 group cursor-pointer"
     >
-      <div className="nossos-caes-card-foto w-full aspect-square bg-cream rounded-2xl overflow-hidden relative shadow-sm border border-brown/5">
-        <div className="w-full h-full bg-brown/10 flex items-center justify-center transition-colors group-hover:bg-orange/10">
+      {/* Moldura da Foto */}
+      <div className="relative w-full aspect-[4/5] bg-white rounded-[2.5rem] overflow-hidden shadow-sm group-hover:shadow-2xl group-hover:shadow-brown/10 transition-all duration-500 border border-brown/5">
+        <div className="w-full h-full bg-brown/5 flex items-center justify-center relative overflow-hidden">
           {imageUrl ? (
-            <img
-              src={imageUrl}
-              alt={name}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-            />
+            <>
+              <img
+                src={imageUrl}
+                alt={name}
+                className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+              />
+              {/* Overlay suave para dar profundidade no hover */}
+              <div className="absolute inset-0 bg-gradient-to-t from-brown/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            </>
           ) : (
-            <span className="text-5xl filter grayscale group-hover:grayscale-0 transition-all duration-300">
-              🐾
-            </span>
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-6xl filter grayscale opacity-20 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500">
+                🐾
+              </span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-brown/20">
+                Foto em breve
+              </span>
+            </div>
           )}
         </div>
       </div>
 
-      <div className="nossos-caes-card-info flex flex-col gap-1">
-        <span className="font-cmas-play text-brown text-xl lg:text-2xl group-hover:text-orange transition-colors">
-          {name}
-        </span>
-        <span className="text-orange text-sm font-medium">{description}</span>
+      {/* Informações */}
+      <div className="flex flex-col gap-2 px-2">
+        <div className="flex flex-col">
+          <span className="font-cmas-play text-brown text-2xl lg:text-3xl font-bold leading-none group-hover:text-orange transition-colors duration-300">
+            {name}
+          </span>
+          <div className="h-1 w-0 group-hover:w-12 bg-orange mt-2 transition-all duration-500 rounded-full" />
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="text-orange text-[11px] font-black uppercase tracking-[0.2em]">
+            {description}
+          </span>
+        </div>
       </div>
     </motion.div>
   );

@@ -4,7 +4,7 @@ import mapaBrasilImg from "../../assets/mapaBrasilImg.png";
 
 const diferenciaisEntrega = [
   {
-    title: "Transporte Aéreo Exclusivo",
+    title: "Transporte Aereo Exclusivo",
     desc: "Trabalhamos apenas com transporte aéreo especializado, garantindo rapidez e menor estresse.",
     icon: <Plane size={24} className="text-cream" />,
   },
@@ -14,12 +14,12 @@ const diferenciaisEntrega = [
     icon: <Heart size={24} className="text-cream" />,
   },
   {
-    title: "Segurança Total",
+    title: "Seguranca Total",
     desc: "Sem compartilhamento de carga. O transporte é focado exclusivamente no bem-estar animal.",
     icon: <ShieldCheck size={24} className="text-cream" />,
   },
   {
-    title: "Logística Completa",
+    title: "Logistica Completa",
     desc: "Cuidamos de toda a burocracia e documentação necessária para o embarque imediato.",
     icon: <Box size={24} className="text-cream" />,
   },
