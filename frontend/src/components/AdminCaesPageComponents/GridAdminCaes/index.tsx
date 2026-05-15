@@ -8,9 +8,16 @@ interface GridAdminCaesProps {
   abrirEditar: (cao: CaoResponse) => void;
   caesFiltrados: CaoResponse[];
   carregando: boolean;
+  showStatus?: boolean; // Nova prop opcional
 }
 
-// Variantes para a animação de entrada dos cards
+// Mapeamento de cores para os status
+const statusStyles: Record<string, string> = {
+  DISPONIVEL: "bg-green-100 text-green-700 border-green-200",
+  RESERVADO: "bg-yellow-100 text-yellow-700 border-yellow-200",
+  VENDIDO: "bg-red-100 text-red-700 border-red-200",
+};
+
 const cardVariants = {
   hidden: { opacity: 0, scale: 0.95 },
   visible: {
@@ -26,6 +33,7 @@ export function GridAdminCaes({
   abrirEditar,
   caesFiltrados,
   carregando,
+  showStatus = false, // Padrão é falso para não quebrar Matrizes/Reprodutores
 }: GridAdminCaesProps) {
   return (
     <>
@@ -44,7 +52,6 @@ export function GridAdminCaes({
           </span>
         </div>
       ) : (
-        /* Grid Responsivo: 1 col no mobile, 2 no tablet, 3 no notebook, 4 em telas grandes */
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {caesFiltrados.map((cao) => {
             const imagemCapa = cao.imagens?.find(
@@ -58,7 +65,6 @@ export function GridAdminCaes({
                 whileHover={{ y: -5 }}
                 className="cao-card bg-white rounded-[2rem] border border-brown/10 overflow-hidden flex flex-col shadow-sm hover:shadow-xl transition-all duration-300"
               >
-                {/* Container da Foto */}
                 <div className="cao-card-foto w-full aspect-square bg-cream relative overflow-hidden">
                   {imagemCapa ? (
                     <img
@@ -72,19 +78,34 @@ export function GridAdminCaes({
                     </div>
                   )}
 
-                  {/* Badge de Destaque */}
+                  {/* Badge de Destaque (Esquerda) */}
                   {cao.destaque && (
-                    <div className="absolute top-4 right-4 bg-orange text-white text-[10px] font-black px-3 py-1 rounded-full uppercase shadow-lg">
-                      Destaque
+                    <div className="absolute top-4 left-4 bg-orange text-white text-[9px] font-black px-3 py-1 rounded-full uppercase shadow-lg z-10">
+                      ★ Destaque
+                    </div>
+                  )}
+
+                  {/* Badge de Status (Direita) - Só aparece se showStatus for true */}
+                  {showStatus && (
+                    <div
+                      className={`absolute top-4 right-4 text-[9px] font-black px-3 py-1 rounded-full uppercase border shadow-sm z-10 ${statusStyles[cao.status] || "bg-gray-100 text-gray-600"}`}
+                    >
+                      {cao.status}
                     </div>
                   )}
                 </div>
 
                 <div className="p-5 flex flex-col gap-4 flex-1">
                   <div className="flex flex-col gap-1">
-                    <span className="font-cmas-play text-brown text-xl font-bold leading-tight">
-                      {cao.nome}
-                    </span>
+                    <div className="flex items-center justify-between">
+                      <span className="font-cmas-play text-brown text-xl font-bold leading-tight">
+                        {cao.nome}
+                      </span>
+                      {/* Ícone de gênero opcional para facilitar visualização rápida */}
+                      <span className="text-xs opacity-30">
+                        {cao.genero === "MACHO" ? "♂" : "♀"}
+                      </span>
+                    </div>
                     <div className="flex flex-wrap gap-1">
                       <span className="bg-orange/10 text-orange text-[10px] font-bold px-2 py-0.5 rounded-md uppercase">
                         {cao.tipoPelo}
@@ -92,10 +113,14 @@ export function GridAdminCaes({
                       <span className="bg-brown/5 text-brown/60 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase">
                         {cao.tamanho}
                       </span>
+                      {cao.cor && (
+                        <span className="bg-brown/5 text-brown/60 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase">
+                          {cao.cor}
+                        </span>
+                      )}
                     </div>
                   </div>
 
-                  {/* Ações */}
                   <div className="flex flex-row gap-2 mt-auto">
                     <button
                       onClick={() => abrirFotos(cao)}

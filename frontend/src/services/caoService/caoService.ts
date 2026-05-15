@@ -1,24 +1,22 @@
 import type { CaoRequest } from "./caoRequest";
 import type { CaoResponse } from "./caoResponse";
 
-const BASE_URL = "http://localhost:8080/api"; // Substitua pela sua URL base
+const BASE_URL = "http://localhost:8080/api";
+
+// Definindo os tipos possíveis para facilitar o uso no Service
+export type TipoCao = "FILHOTE" | "MATRIZ" | "REPRODUTOR";
 
 async function handleRequest<T>(
   url: string,
-  options: RequestInit = {}, // Definimos um valor padrão vazio
+  options: RequestInit = {},
 ): Promise<T> {
   const token = localStorage.getItem("accessToken");
-
-  // 1. Criamos um objeto de Headers combinando os existentes com os novos
   const headers = new Headers(options.headers);
 
-  // 2. Injetamos o Token JWT se ele existir
   if (token) {
     headers.set("Authorization", `Bearer ${token}`);
   }
 
-  // 3. Definimos Content-Type como JSON apenas se não for um upload de arquivo (FormData)
-  // O FormData precisa que o navegador defina o boundary automaticamente
   if (!(options.body instanceof FormData) && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
@@ -28,27 +26,28 @@ async function handleRequest<T>(
     headers,
   });
 
-  // 4. Tratamento de erro robusto
   if (!response.ok) {
     if (response.status === 403) {
-      console.error(
-        "Acesso Negado: Você não tem permissão ou seu token expirou.",
-      );
+      console.error("Acesso Negado ou Token Expirado.");
     }
-    // Tenta capturar a mensagem de erro do backend se existir
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(
-      errorData.message || `Erro na requisição: ${response.status}`,
-    );
+    throw new Error(errorData.message || `Erro: ${response.status}`);
   }
 
   if (response.status === 204) return {} as T;
-
   return await response.json();
 }
 
 export const caoService = {
-  listarTodos: () => handleRequest<CaoResponse[]>("/caes"),
+  // Agora suporta a busca geral ou filtrada por tipo na mesma rota base
+  listarTodos: (tipo?: TipoCao) => {
+    const query = tipo ? `?tipo=${tipo}` : "";
+    return handleRequest<CaoResponse[]>(`/caes${query}`);
+  },
+
+  // Atalho semântico para carregar por tipo (opcional, mas ajuda na legibilidade)
+  listarPorTipo: (tipo: TipoCao) =>
+    handleRequest<CaoResponse[]>(`/caes?tipo=${tipo}`),
 
   listarDisponiveis: () => handleRequest<CaoResponse[]>("/caes/disponiveis"),
 
@@ -59,14 +58,12 @@ export const caoService = {
   criar: (data: CaoRequest) =>
     handleRequest<CaoResponse>("/caes", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     }),
 
   atualizar: (id: string, data: CaoRequest) =>
     handleRequest<CaoResponse>(`/caes/${id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     }),
 

@@ -26,6 +26,7 @@ import { AdminAgendamentosPage } from "../AdminAgendamentosPage";
 import { AdminDepoimentosPage } from "../AdminDepoimentosPage";
 import { AdminFaqPage } from "../AdminFaqPage";
 import { AdminDashboardPage } from "../AdminDashboardPage";
+import { AdminFilhotesPage } from "../AdminFilhotesPage";
 
 type MenuItem = {
   label: string;
@@ -241,6 +242,7 @@ export function AdminPage() {
               <Routes>
                 <Route path="/" element={<AdminDashboardPage />} />
                 <Route path="/caes" element={<AdminCaesPage />} />
+                <Route path="/filhotes" element={<AdminFilhotesPage />} />
                 <Route path="/reservas" element={<AdminReservasPage />} />
                 <Route path="/clientes" element={<AdminClientesPage />} />
                 <Route

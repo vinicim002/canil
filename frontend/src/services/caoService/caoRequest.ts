@@ -1,5 +1,6 @@
 export interface CaoRequest {
   nome: string;
+  tipo: "FILHOTE" | "MATRIZ" | "REPRODUTOR";
   tipoPelo: string;
   tamanho: string;
   genero: string;
