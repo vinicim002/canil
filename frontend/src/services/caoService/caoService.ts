@@ -3,7 +3,6 @@ import type { CaoResponse } from "./caoResponse";
 
 const BASE_URL = "http://localhost:8080/api";
 
-// Definindo os tipos possíveis para facilitar o uso no Service
 export type TipoCao = "FILHOTE" | "MATRIZ" | "REPRODUTOR";
 
 async function handleRequest<T>(
@@ -21,17 +20,26 @@ async function handleRequest<T>(
     headers.set("Content-Type", "application/json");
   }
 
+  // Log do que está sendo enviado
+  if (options.body && !(options.body instanceof FormData)) {
+    console.log("📤 Enviando para", url, JSON.parse(options.body as string));
+  }
+
   const response = await fetch(`${BASE_URL}${url}`, {
     ...options,
     headers,
   });
 
   if (!response.ok) {
-    if (response.status === 403) {
-      console.error("Acesso Negado ou Token Expirado.");
-    }
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || `Erro: ${response.status}`);
+    console.error("❌ Status:", response.status);
+    console.error("❌ URL:", url);
+    console.error("❌ Erro do servidor:", errorData);
+    throw new Error(
+      errorData.message ||
+        JSON.stringify(errorData) ||
+        `Erro: ${response.status}`,
+    );
   }
 
   if (response.status === 204) return {} as T;
@@ -39,13 +47,11 @@ async function handleRequest<T>(
 }
 
 export const caoService = {
-  // Agora suporta a busca geral ou filtrada por tipo na mesma rota base
   listarTodos: (tipo?: TipoCao) => {
     const query = tipo ? `?tipo=${tipo}` : "";
     return handleRequest<CaoResponse[]>(`/caes${query}`);
   },
 
-  // Atalho semântico para carregar por tipo (opcional, mas ajuda na legibilidade)
   listarPorTipo: (tipo: TipoCao) =>
     handleRequest<CaoResponse[]>(`/caes?tipo=${tipo}`),
 
