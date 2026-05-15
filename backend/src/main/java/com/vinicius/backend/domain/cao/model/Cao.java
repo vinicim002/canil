@@ -59,6 +59,10 @@ public class Cao {
 
     private Boolean destaque = false;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TipoCao tipo; // Agora o sistema sabe exatamente o que o cão é
+
     // Árvore Genealógica
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pai_id")

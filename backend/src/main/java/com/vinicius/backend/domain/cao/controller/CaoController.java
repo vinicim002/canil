@@ -4,6 +4,7 @@ import com.vinicius.backend.domain.cao.dto.CaoFiltroRequest;
 import com.vinicius.backend.domain.cao.dto.CaoRequest;
 import com.vinicius.backend.domain.cao.dto.CaoResponse;
 import com.vinicius.backend.domain.cao.enums.StatusCao;
+import com.vinicius.backend.domain.cao.enums.TipoCao; // Importado
 import com.vinicius.backend.domain.cao.service.CaoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,26 +29,18 @@ public class CaoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(caoService.criar(request));
     }
 
+    // LISTAR: Agora suporta listar todos ou filtrar por TIPO (Filhote/Matriz/Reprodutor)
     @GetMapping
-    public ResponseEntity<List<CaoResponse>> listarTodos() {
+    public ResponseEntity<List<CaoResponse>> listar(@RequestParam(required = false) TipoCao tipo) {
+        if (tipo != null) {
+            return ResponseEntity.ok(caoService.listarPorTipo(tipo));
+        }
         return ResponseEntity.ok(caoService.listarTodos());
     }
 
+    // FILTROS AVANÇADOS: O Spring mapeia automaticamente os parâmetros da URL para o Record
     @GetMapping("/filtros")
-    public ResponseEntity<List<CaoResponse>> listarComFiltros(
-            @RequestParam(required = false) StatusCao status,
-            @RequestParam(required = false) String tipoPelo,
-            @RequestParam(required = false) String tamanho,
-            @RequestParam(required = false) String genero,
-            @RequestParam(required = false) Boolean destaque
-    ) {
-        CaoFiltroRequest filtro = new CaoFiltroRequest(
-                status,
-                tipoPelo != null ? com.vinicius.backend.domain.cao.enums.TipoPelo.valueOf(tipoPelo) : null,
-                tamanho != null ? com.vinicius.backend.domain.cao.enums.Tamanho.valueOf(tamanho) : null,
-                genero != null ? com.vinicius.backend.domain.cao.enums.Genero.valueOf(genero) : null,
-                destaque
-        );
+    public ResponseEntity<List<CaoResponse>> listarComFiltros(CaoFiltroRequest filtro) {
         return ResponseEntity.ok(caoService.listarComFiltros(filtro));
     }
 
@@ -68,19 +61,13 @@ public class CaoController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CaoResponse> atualizar(
-            @PathVariable UUID id,
-            @RequestBody @Valid CaoRequest request
-    ) {
+    public ResponseEntity<CaoResponse> atualizar(@PathVariable UUID id, @RequestBody @Valid CaoRequest request) {
         return ResponseEntity.ok(caoService.atualizar(id, request));
     }
 
     @PatchMapping("/{id}/status")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CaoResponse> atualizarStatus(
-            @PathVariable UUID id,
-            @RequestParam StatusCao status
-    ) {
+    public ResponseEntity<CaoResponse> atualizarStatus(@PathVariable UUID id, @RequestParam StatusCao status) {
         return ResponseEntity.ok(caoService.atualizarStatus(id, status));
     }
 

@@ -13,6 +13,7 @@ public class CaoMapper {
     public Cao toEntity(CaoRequest request) {
         return Cao.builder()
                 .nome(request.nome())
+                .tipo(request.tipo()) // ADICIONADO: Traduz do DTO para a Entity
                 .tipoPelo(request.tipoPelo())
                 .tamanho(request.tamanho())
                 .genero(request.genero())
@@ -29,6 +30,7 @@ public class CaoMapper {
         return new CaoResponse(
                 cao.getId(),
                 cao.getNome(),
+                cao.getTipo(), // ADICIONADO: Traduz da Entity para o DTO
                 cao.getTipoPelo(),
                 cao.getTamanho(),
                 cao.getGenero(),
@@ -40,7 +42,6 @@ public class CaoMapper {
                 cao.getDestaque(),
                 cao.getPai() != null ? toPaisResponse(cao.getPai()) : null,
                 cao.getMae() != null ? toPaisResponse(cao.getMae()) : null,
-                // MAPEAMENTO DAS IMAGENS AQUI:
                 cao.getImagens() != null ? cao.getImagens().stream()
                                            .map(this::toImagemResponse)
                                            .toList() : null,
@@ -60,7 +61,7 @@ public class CaoMapper {
     private com.vinicius.backend.domain.imagem.dto.ImagemResponse toImagemResponse(com.vinicius.backend.domain.imagem.model.Imagem imagem) {
         return new com.vinicius.backend.domain.imagem.dto.ImagemResponse(
                 imagem.getId(),
-                imagem.getCao().getId(), // caoId
+                imagem.getCao().getId(),
                 imagem.getUrl(),
                 imagem.getPublicId(),
                 imagem.getCapa(),

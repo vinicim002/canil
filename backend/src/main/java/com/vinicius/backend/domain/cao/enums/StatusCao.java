@@ -4,6 +4,4 @@ public enum StatusCao {
     DISPONIVEL,
     RESERVADO,
     VENDIDO,
-    REPRODUTOR,
-    MATRIZ
 }
