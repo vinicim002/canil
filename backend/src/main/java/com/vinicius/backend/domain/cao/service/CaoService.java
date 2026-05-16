@@ -3,8 +3,7 @@ package com.vinicius.backend.domain.cao.service;
 import com.vinicius.backend.domain.cao.dto.CaoFiltroRequest;
 import com.vinicius.backend.domain.cao.dto.CaoRequest;
 import com.vinicius.backend.domain.cao.dto.CaoResponse;
-import com.vinicius.backend.domain.cao.enums.StatusCao;
-import com.vinicius.backend.domain.cao.enums.TipoCao;
+import com.vinicius.backend.domain.cao.enums.*;
 import com.vinicius.backend.domain.cao.mapper.CaoMapper;
 import com.vinicius.backend.domain.cao.model.Cao;
 import com.vinicius.backend.domain.cao.repository.CaoRepository;
@@ -30,7 +29,6 @@ public class CaoService {
         return caoMapper.toResponse(caoRepository.save(cao));
     }
 
-    // 1. Corrigido: listarTodos
     @Transactional(readOnly = true)
     public List<CaoResponse> listarTodos() {
         return caoRepository.findAll().stream()
@@ -45,7 +43,6 @@ public class CaoService {
                 .toList();
     }
 
-    // 2. Corrigido: listarDisponiveis
     @Transactional(readOnly = true)
     public List<CaoResponse> listarDisponiveis() {
         return caoRepository.findByStatus(StatusCao.DISPONIVEL).stream()
@@ -53,7 +50,6 @@ public class CaoService {
                 .toList();
     }
 
-    // 3. Corrigido: listarDestaques
     @Transactional(readOnly = true)
     public List<CaoResponse> listarDestaques() {
         return caoRepository.findByDestaqueTrue().stream()
@@ -61,7 +57,6 @@ public class CaoService {
                 .toList();
     }
 
-    // 4. Corrigido: buscarPorId
     @Transactional(readOnly = true)
     public CaoResponse buscarPorId(UUID id) {
         return caoMapper.toResponse(buscarEntidadePorId(id));
@@ -84,21 +79,19 @@ public class CaoService {
     public CaoResponse atualizar(UUID id, CaoRequest request) {
         Cao cao = buscarEntidadePorId(id);
 
-        // Atualiza campos básicos
         cao.setNome(request.nome());
         cao.setTipo(request.tipo());
-        cao.setTipoPelo(request.tipoPelo());
-        cao.setTamanho(request.tamanho());
-        cao.setGenero(request.genero());
-        cao.setStatus(request.status());
+        cao.setTipoPelo(caoMapper.parseEnum(TipoPelo.class, request.tipoPelo(), "tipoPelo"));
+        cao.setTamanho(caoMapper.parseEnum(Tamanho.class, request.tamanho(), "tamanho"));
+        cao.setGenero(caoMapper.parseGenero(request.genero()));
+        cao.setStatus(caoMapper.parseEnum(StatusCao.class, request.status(), "status"));
         cao.setDataNascimento(request.dataNascimento());
         cao.setPedigree(request.pedigree());
         cao.setDescricao(request.descricao());
         cao.setDestaque(request.destaque() != null ? request.destaque() : false);
-
-        if (request.cor() != null) {
-            cao.setCor(com.vinicius.backend.domain.cao.enums.Cor.valueOf(request.cor().toUpperCase()));
-        }
+        cao.setCor(request.cor() != null && !request.cor().isBlank()
+                ? caoMapper.parseEnum(Cor.class, request.cor(), "cor")
+                : null);
 
         vincularPais(cao, request.paiId(), request.maeId());
 
@@ -118,7 +111,6 @@ public class CaoService {
         caoRepository.delete(cao);
     }
 
-    // Método auxiliar privado para evitar repetição de código
     private void vincularPais(Cao cao, UUID paiId, UUID maeId) {
         cao.setPai(paiId != null ? buscarEntidadePorId(paiId) : null);
         cao.setMae(maeId != null ? buscarEntidadePorId(maeId) : null);

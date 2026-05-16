@@ -1,6 +1,6 @@
 package com.vinicius.backend.domain.cao.dto;
 
-import com.vinicius.backend.domain.cao.enums.*;
+import com.vinicius.backend.domain.cao.enums.TipoCao;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
@@ -13,17 +13,17 @@ public record CaoRequest(
         @NotNull(message = "O tipo (Filhote, Matriz ou Reprodutor) é obrigatório")
         TipoCao tipo,
 
-        @NotNull(message = "Tipo de pelo é obrigatório")
-        TipoPelo tipoPelo,
+        @NotBlank(message = "Tipo de pelo é obrigatório")
+        String tipoPelo,
 
-        @NotNull(message = "Tamanho é obrigatório")
-        Tamanho tamanho,
+        @NotBlank(message = "Tamanho é obrigatório")
+        String tamanho,
 
-        @NotNull(message = "Gênero é obrigatório")
-        Genero genero,
+        @NotBlank(message = "Gênero é obrigatório")
+        String genero,
 
-        @NotNull(message = "Status é obrigatório")
-        StatusCao status,
+        @NotBlank(message = "Status é obrigatório")
+        String status,
 
         LocalDate dataNascimento,
         String cor,
