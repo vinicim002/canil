@@ -141,9 +141,9 @@ export function AdminCaesPage() {
             salvando={salvando}
             erro={erro}
             TIPOS_PELO={TIPOS_PELO}
+            TIPOS={["REPRODUTOR", "MATRIZ"]}
             TAMANHOS={TAMANHOS}
             GENEROS={GENEROS}
-            STATUS={STATUS}
           />
         )}
       </AnimatePresence>
