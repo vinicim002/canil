@@ -61,7 +61,7 @@ public class Cao {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private TipoCao tipo; // Agora o sistema sabe exatamente o que o cão é
+    private TipoCao tipo;
 
     // Árvore Genealógica
     @ManyToOne(fetch = FetchType.LAZY)

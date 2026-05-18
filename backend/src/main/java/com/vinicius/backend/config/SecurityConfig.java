@@ -74,7 +74,15 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/caes/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/caes/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/caes/**").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, "/api/caes/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/caes/**").authenticated()
+
+                        // FAQ: Leitura pública, Escrita/Modificação autenticada
+                        .requestMatchers(HttpMethod.GET, "/api/faq/**").permitAll() // ✅ FAQ Público liberado!
+                        .requestMatchers(HttpMethod.POST, "/api/faq/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/faq/**").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, "/api/faq/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/faq/**").authenticated()
 
                         // 4. REGRA GERAL (SEMPRE POR ÚLTIMO)
                         .anyRequest().authenticated()
@@ -94,7 +102,6 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // Origens permitidas (lidas do application.properties)
-        // Exemplo: http://localhost:3000,https://seu-dominio.com
         List<String> origins = Arrays.asList(allowedOrigins.split(","));
         configuration.setAllowedOrigins(origins);
 
@@ -104,13 +111,13 @@ public class SecurityConfig {
         // Headers permitidos (Authorization é obrigatório para JWT)
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "X-Requested-With"));
 
-        // Headers expostos ao cliente (se precisar retornar headers customizados)
+        // Headers expostos ao cliente
         configuration.setExposedHeaders(Arrays.asList("Authorization", "X-Total-Count"));
 
-        // Permite credenciais (necessário para JWT no header Authorization)
+        // Permite credenciais
         configuration.setAllowCredentials(true);
 
-        // Tempo máximo de cache da preflight request (em segundos)
+        // Tempo máximo de cache da preflight request
         configuration.setMaxAge(corsMaxAge);
 
         // Registra a configuração para todos os endpoints
@@ -122,14 +129,12 @@ public class SecurityConfig {
 
     /**
      * Provider de autenticação com DAO
-     * Usa UserDetailsServiceImpl para carregar dados do usuário
      */
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
-        // Oculta se o usuário existe ou não (melhora segurança)
         provider.setHideUserNotFoundExceptions(true);
         return provider;
     }
@@ -144,7 +149,6 @@ public class SecurityConfig {
 
     /**
      * Encoder de senha com BCrypt
-     * Nível de força padrão (10) é adequado para a maioria dos casos
      */
     @Bean
     public PasswordEncoder passwordEncoder() {
