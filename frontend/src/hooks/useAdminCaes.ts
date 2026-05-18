@@ -15,7 +15,7 @@ function formInicial(tipo: TipoCao): CaoRequest {
     tipoPelo: "",
     tamanho: "",
     genero: "",
-    status: tipo === "FILHOTE" ? "DISPONIVEL" : tipo,
+    status: "DISPONIVEL",
     cor: "",
     descricao: "",
     destaque: false,
@@ -120,6 +120,7 @@ export function useAdminCaes(tipos: TipoCao | TipoCao[]) {
 
   async function handleSalvar(e: React.FormEvent) {
     e.preventDefault();
+    console.log("Form data:", form);
     setErro("");
     setSalvando(true);
     try {

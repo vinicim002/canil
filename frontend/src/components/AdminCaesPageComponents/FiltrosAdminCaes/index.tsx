@@ -7,7 +7,7 @@ interface FiltroAdminCaesProps {
   setFiltroStatus: (status: string) => void;
   filtroGenero: string;
   setFiltroGenero: (genero: string) => void;
-  STATUS: string[];
+  STATUS?: string[]; // Opcional para quando for a página de adultos
   GENEROS: string[];
 }
 
@@ -40,25 +40,13 @@ export function FiltroAdminCaes({
         />
       </div>
 
-      {/* Selects em Grid no Mobile */}
-      <div className="grid grid-cols-2 md:flex items-center gap-3">
-        <select
-          value={filtroStatus}
-          onChange={(e) => setFiltroStatus(e.target.value)}
-          className="bg-white border border-brown/10 rounded-2xl py-3 px-4 text-body text-sm font-medium outline-none focus:border-orange transition-all shadow-sm cursor-pointer hover:bg-brown/[0.02]"
-        >
-          <option value="">Todos os status</option>
-          {STATUS.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
-
+      {/* Selects com layout flexível */}
+      <div className="flex flex-row items-center gap-3 w-full lg:w-auto">
+        {/* Filtros de Gênero (Aparece em ambos) */}
         <select
           value={filtroGenero}
           onChange={(e) => setFiltroGenero(e.target.value)}
-          className="bg-white border border-brown/10 rounded-2xl py-3 px-4 text-body text-sm font-medium outline-none focus:border-orange transition-all shadow-sm cursor-pointer hover:bg-brown/[0.02]"
+          className="flex-1 lg:flex-none bg-white border border-brown/10 rounded-2xl py-3 px-4 text-body text-sm font-medium outline-none focus:border-orange transition-all shadow-sm cursor-pointer hover:bg-brown/[0.02]"
         >
           <option value="">Todos os gêneros</option>
           {GENEROS.map((g) => (
@@ -68,6 +56,22 @@ export function FiltroAdminCaes({
           ))}
         </select>
 
+        {/* Filtro de Status - SÓ RENDERIZA SE O ARRAY "STATUS" FOR PASSADO (Página de Filhotes) */}
+        {STATUS && STATUS.length > 0 && (
+          <select
+            value={filtroStatus}
+            onChange={(e) => setFiltroStatus(e.target.value)}
+            className="flex-1 lg:flex-none bg-white border border-brown/10 rounded-2xl py-3 px-4 text-body text-sm font-medium outline-none focus:border-orange transition-all shadow-sm cursor-pointer hover:bg-brown/[0.02]"
+          >
+            <option value="">Todos os status</option>
+            {STATUS.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+        )}
+
         {/* Botão Limpar (Desktop) */}
         {temFiltroAtivo && (
           <button
@@ -76,7 +80,7 @@ export function FiltroAdminCaes({
               setFiltroGenero("");
               setBusca("");
             }}
-            className="hidden md:flex items-center gap-1.5 text-orange text-sm font-bold hover:text-orange/80 transition-colors px-2 cursor-pointer"
+            className="hidden md:flex items-center gap-1.5 text-orange text-sm font-bold hover:text-orange/80 transition-colors px-2 cursor-pointer whitespace-nowrap"
           >
             <X size={16} />
             Limpar
@@ -84,7 +88,7 @@ export function FiltroAdminCaes({
         )}
       </div>
 
-      {/* Botão Limpar (Mobile - aparece como uma barra abaixo) */}
+      {/* Botão Limpar (Mobile) */}
       {temFiltroAtivo && (
         <button
           onClick={() => {

@@ -10,7 +10,6 @@ import { useAdminCaes } from "../../hooks/useAdminCaes";
 const TIPOS_PELO = ["LISO", "LONGO", "DURO"];
 const TAMANHOS = ["KANINCHEN", "MINIATURA", "STANDARD"];
 const GENEROS = ["MACHO", "FÊMEA"];
-const STATUS = ["REPRODUTOR", "MATRIZ"];
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -114,7 +113,6 @@ export function AdminCaesPage() {
           setFiltroStatus={setFiltroStatus}
           filtroGenero={filtroGenero}
           setFiltroGenero={setFiltroGenero}
-          STATUS={STATUS}
           GENEROS={GENEROS}
         />
       </motion.div>
