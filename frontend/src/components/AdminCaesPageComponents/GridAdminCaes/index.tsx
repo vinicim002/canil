@@ -33,7 +33,7 @@ export function GridAdminCaes({
   abrirEditar,
   caesFiltrados,
   carregando,
-  showStatus = false, // Padrão é falso para não quebrar Matrizes/Reprodutores
+  showStatus = true, // Padrão é falso para não quebrar Matrizes/Reprodutores
 }: GridAdminCaesProps) {
   return (
     <>

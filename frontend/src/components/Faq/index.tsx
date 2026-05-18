@@ -1,38 +1,38 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Minus } from "lucide-react";
+import { faqService } from "../../services/faqService/faqService"; // ✅ Atualizado para o serviço em fetch
+import type { FaqResponse } from "../../services/faqService/faqResponse"; // ✅ Tipagem importada
 import salsichaDeOculos from "../../assets/salsichaDeoculos.png";
 
-const faqs = [
-  {
-    question: "Com quantas semanas o filhote vai para casa?",
-    answer:
-      "Nossos filhotes são liberados a partir das 8 a 10 semanas, após receberem as primeiras doses da vacina e passarem por uma avaliação veterinária completa para garantir que estão prontos para o novo lar.",
-  },
-  {
-    question: "O filhote já vai vacinado e vermifugado?",
-    answer:
-      "Sim! Todos os filhotes são entregues com o ciclo de vermifugação em dia e com as doses da vacina V10 (Importada) correspondentes à idade do animal.",
-  },
-  {
-    question: "Vocês entregam em outros estados?",
-    answer:
-      "Sim, realizamos entregas em todo o Brasil via transporte aéreo especializado, garantindo que o filhote chegue com segurança e o menor estresse possível.",
-  },
-  {
-    question: "Como funciona a reserva do filhote?",
-    answer:
-      "A reserva é feita mediante um contrato de compra e venda e um sinal. Assim que o filhote atinge a idade de liberação, o restante do pagamento é efetuado e agendamos a entrega.",
-  },
-  {
-    question: "Os filhotes possuem Pedigree?",
-    answer:
-      "Com certeza. Todos os nossos exemplares possuem Pedigree, garantindo a pureza da raça e a linhagem de excelência do Canil Alto da Bela Vista.",
-  },
-];
-
 export function Faq() {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [faqs, setFaqs] = useState<FaqResponse[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // ✅ Alterado de number para string para usar o ID estável do banco de dados
+  const [activeId, setActiveId] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function carregarFaqsPublicas() {
+      try {
+        setLoading(true);
+        // ✅ Consome a rota nativa de ativos que criamos no fetchService
+        const data = await faqService.listarAtivos();
+
+        if (Array.isArray(data)) {
+          // Apenas ordena pelo critério definido no painel do administrador
+          const faqsOrdenadas = data.sort((a, b) => a.ordem - b.ordem);
+          setFaqs(faqsOrdenadas);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar o FAQ na Home:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    carregarFaqsPublicas();
+  }, []);
 
   return (
     <section className="section-faq px-6 md:px-12 lg:px-36 py-16 md:py-20 flex flex-col lg:flex-row items-stretch lg:items-start justify-between gap-8 lg:gap-16 overflow-hidden">
@@ -76,7 +76,7 @@ export function Faq() {
           </motion.p>
         </div>
 
-        {/* Imagem com Animação - Posicionamento Preciso */}
+        {/* Imagem com Animação */}
         <div className="relative w-full h-64 md:h-80 lg:h-96 lg:top-[100px] flex items-end justify-center">
           <motion.img
             src={salsichaDeOculos}
@@ -94,67 +94,86 @@ export function Faq() {
         </div>
       </motion.div>
 
-      {/* Lado Direito - Acordeão */}
+      {/* Lado Direito - Acordeão Dinâmico */}
       <motion.div
-        className="faq-direita w-full lg:w-1/2 flex flex-col gap-3 md:gap-4"
+        className="faq-direita w-full lg:w-1/2 flex flex-col gap-3 md:gap-4 justify-center"
         initial={{ opacity: 0, x: 30 }}
         whileInView={{ opacity: 1, x: 0 }}
         viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 0.6 }}
       >
-        {faqs.map((faq, index) => (
-          <motion.div
-            key={index}
-            className="faq-item flex flex-col group border-b border-orange/20 last:border-b-0"
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.5, delay: index * 0.05 }}
-          >
-            <button
-              onClick={() =>
-                setActiveIndex(activeIndex === index ? null : index)
-              }
-              className="faq-item-header flex flex-row items-center justify-between gap-3 md:gap-4 py-4 md:py-5 text-left cursor-pointer transition-all hover:opacity-80"
-            >
-              <p
-                className={`font-bold text-sm md:text-base lg:text-lg transition-colors duration-300 flex-1 ${activeIndex === index ? "text-orange" : "text-brown"}`}
-              >
-                {faq.question}
-              </p>
-              <motion.div
-                className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 ${activeIndex === index ? "bg-orange" : "bg-brown/10 group-hover:bg-brown/20"}`}
-                animate={{ rotate: activeIndex === index ? 180 : 0 }}
-              >
-                {activeIndex === index ? (
-                  <Minus className="text-white" size={20} />
-                ) : (
-                  <Plus
-                    className={`${activeIndex === index ? "text-white" : "text-brown"}`}
-                    size={20}
-                  />
-                )}
-              </motion.div>
-            </button>
+        {loading ? (
+          <div className="text-center py-10 text-brown/40 font-bold uppercase tracking-widest text-xs">
+            🐾 Carregando perguntas...
+          </div>
+        ) : faqs.length === 0 ? (
+          <div className="text-center py-10 text-brown/40 font-bold uppercase tracking-widest text-xs">
+            Nenhuma pergunta disponível.
+          </div>
+        ) : (
+          faqs.map((faq, index) => {
+            const isOpen = activeId === faq.id;
 
-            {/* Conteúdo Expansível */}
-            <AnimatePresence mode="wait">
-              {activeIndex === index && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="overflow-hidden"
+            return (
+              <motion.div
+                key={faq.id}
+                className="faq-item flex flex-col group border-b border-orange/20 last:border-b-0"
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.5, delay: index * 0.05 }}
+              >
+                <button
+                  type="button"
+                  onClick={() => setActiveId(isOpen ? null : faq.id)}
+                  className="faq-item-header flex flex-row items-center justify-between gap-3 md:gap-4 py-4 md:py-5 text-left cursor-pointer transition-all hover:opacity-80"
                 >
-                  <p className="pb-4 md:pb-6 text-body/70 text-sm md:text-base leading-relaxed font-medium pr-4 md:pr-10">
-                    {faq.answer}
+                  <p
+                    className={`font-bold text-sm md:text-base lg:text-lg transition-colors duration-300 flex-1 ${
+                      isOpen ? "text-orange" : "text-brown"
+                    }`}
+                  >
+                    {faq.pergunta}
                   </p>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
-        ))}
+                  <motion.div
+                    className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 ${
+                      isOpen
+                        ? "bg-orange"
+                        : "bg-brown/10 group-hover:bg-brown/20"
+                    }`}
+                    animate={{ rotate: isOpen ? 180 : 0 }}
+                  >
+                    {isOpen ? (
+                      <Minus className="text-white" size={20} />
+                    ) : (
+                      <Plus
+                        className={`${isOpen ? "text-white" : "text-brown"}`}
+                        size={20}
+                      />
+                    )}
+                  </motion.div>
+                </button>
+
+                {/* Conteúdo Expansível controlado pelo ID único */}
+                <AnimatePresence mode="wait">
+                  {isOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="overflow-hidden"
+                    >
+                      <p className="pb-4 md:pb-6 text-body/70 text-sm md:text-base leading-relaxed font-medium pr-4 md:pr-10">
+                        {faq.resposta}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            );
+          })
+        )}
       </motion.div>
     </section>
   );

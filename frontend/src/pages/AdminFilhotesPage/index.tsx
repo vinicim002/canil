@@ -105,6 +105,7 @@ export function AdminFilhotesPage() {
             setForm={setForm}
             salvando={salvando}
             erro={erro}
+            TIPOS={["FILHOTE"]}
             TIPOS_PELO={TIPOS_PELO}
             TAMANHOS={TAMANHOS}
             GENEROS={GENEROS}
