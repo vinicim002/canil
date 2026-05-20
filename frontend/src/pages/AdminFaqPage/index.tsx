@@ -1,19 +1,7 @@
 import { useState, useEffect } from "react";
 import { api } from "../../services/api";
-
-interface FaqResponse {
-  id: string;
-  pergunta: string;
-  resposta: string;
-  ordem: number;
-  ativo: boolean;
-}
-
-interface FaqRequest {
-  pergunta: string;
-  resposta: string;
-  ordem: number;
-}
+import type { FaqResponse } from "../../services/faqService/faqResponse";
+import type { FaqRequest } from "../../services/faqService/faqRequest";
 
 const formInicial: FaqRequest = { pergunta: "", resposta: "", ordem: 0 };
 

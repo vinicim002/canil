@@ -120,7 +120,6 @@ export function useAdminCaes(tipos: TipoCao | TipoCao[]) {
 
   async function handleSalvar(e: React.FormEvent) {
     e.preventDefault();
-    console.log("Form data:", form);
     setErro("");
     setSalvando(true);
     try {

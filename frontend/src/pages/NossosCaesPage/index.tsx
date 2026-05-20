@@ -4,7 +4,7 @@ import { DogCard } from "../../components/DogCard";
 import type { CaoResponse } from "../../services/caoService/caoResponse";
 import { caoService } from "../../services/caoService/caoService";
 import type { ImagemResponse } from "../../services/imageService/ImagemResponse";
-import { PawPrint, Calendar } from "lucide-react";
+import { PawPrint } from "lucide-react";
 
 export function NossosCaesPage() {
   const [reprodutores, setReprodutores] = useState<CaoResponse[]>([]);

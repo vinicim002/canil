@@ -3,15 +3,10 @@ import {
   reservaService,
   type ReservaResponse,
 } from "../../services/reservaService";
-
-const statusColor: Record<string, string> = {
-  SOLICITADA: "bg-yellow-100 text-yellow-700",
-  EM_ANALISE: "bg-blue-100 text-blue-700",
-  APROVADA: "bg-green-100 text-green-700",
-  REJEITADA: "bg-red-100 text-red-700",
-  PAGA: "bg-purple-100 text-purple-700",
-  CANCELADA: "bg-red-100 text-red-700",
-};
+import {
+  getStatusColor,
+  statusReservaColor,
+} from "../../utils/statusColors";
 
 export function AdminReservasPage() {
   const [reservas, setReservas] = useState<ReservaResponse[]>([]);
@@ -75,7 +70,7 @@ export function AdminReservasPage() {
           className="bg-white border border-brown/20 rounded-xl py-2.5 px-4 text-body text-sm font-medium outline-none focus:border-orange transition-colors"
         >
           <option value="">Todos os status</option>
-          {Object.keys(statusColor).map((s) => (
+          {Object.keys(statusReservaColor).map((s) => (
             <option key={s} value={s}>
               {s}
             </option>
@@ -131,7 +126,7 @@ export function AdminReservasPage() {
                 R$ {r.valorTotal?.toFixed(2)}
               </span>
               <span
-                className={`text-xs font-medium py-1 px-2 rounded-full w-fit ${statusColor[r.status] || "bg-gray-100 text-gray-700"}`}
+                className={`text-xs font-medium py-1 px-2 rounded-full w-fit ${getStatusColor(statusReservaColor, r.status)}`}
               >
                 {r.status}
               </span>

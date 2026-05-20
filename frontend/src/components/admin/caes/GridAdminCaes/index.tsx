@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
-import type { CaoResponse } from "../../../services/caoService/caoResponse";
-import type { ImagemResponse } from "../../../services/imageService/ImagemResponse";
+import type { CaoResponse } from "../../../../services/caoService/caoResponse";
+import type { ImagemResponse } from "../../../../services/imageService/ImagemResponse";
+import { LoadingSpinner } from "../../../ui/LoadingSpinner";
+import { statusFilhoteGridColor, getStatusColor } from "../../../../utils/statusColors";
 
 interface GridAdminCaesProps {
   handleDeletar: (id: string) => void;
@@ -10,13 +12,6 @@ interface GridAdminCaesProps {
   carregando: boolean;
   showStatus?: boolean; // Nova prop opcional
 }
-
-// Mapeamento de cores para os status
-const statusStyles: Record<string, string> = {
-  DISPONIVEL: "bg-green-100 text-green-700 border-green-200",
-  RESERVADO: "bg-yellow-100 text-yellow-700 border-yellow-200",
-  VENDIDO: "bg-red-100 text-red-700 border-red-200",
-};
 
 const cardVariants = {
   hidden: { opacity: 0, scale: 0.95 },
@@ -38,12 +33,11 @@ export function GridAdminCaes({
   return (
     <>
       {carregando ? (
-        <div className="flex flex-col items-center justify-center py-32 gap-4">
-          <div className="w-12 h-12 border-4 border-orange/20 border-t-orange rounded-full animate-spin" />
-          <span className="text-brown/50 font-bold animate-pulse">
-            Carregando cães...
-          </span>
-        </div>
+        <LoadingSpinner
+          size="lg"
+          message="Carregando cães..."
+          className="py-32 [&_span]:text-brown/50 [&_span]:font-bold [&_span]:animate-pulse"
+        />
       ) : caesFiltrados.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 gap-3 bg-white rounded-3xl border border-dashed border-brown/20">
           <span className="text-5xl">🐾</span>
@@ -88,7 +82,7 @@ export function GridAdminCaes({
                   {/* Badge de Status (Direita) - Só aparece se showStatus for true */}
                   {showStatus && (
                     <div
-                      className={`absolute top-4 right-4 text-[9px] font-black px-3 py-1 rounded-full uppercase border shadow-sm z-10 ${statusStyles[cao.status] || "bg-gray-100 text-gray-600"}`}
+                      className={`absolute top-4 right-4 text-[9px] font-black px-3 py-1 rounded-full uppercase border shadow-sm z-10 ${getStatusColor(statusFilhoteGridColor, cao.status)}`}
                     >
                       {cao.status}
                     </div>

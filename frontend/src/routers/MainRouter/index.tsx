@@ -2,7 +2,7 @@ import { Route, Routes } from "react-router-dom";
 import { Home } from "../../pages/Home";
 import { SobrePage } from "../../pages/SobrePage";
 import { NossosCaesPage } from "../../pages/NossosCaesPage";
-import { MainLayout } from "../../template/MainLayout";
+import { MainLayout } from "../../layouts/MainLayout";
 import { ContatoPage } from "../../pages/ContatoPage";
 import { FilhotesPage } from "../../pages/FilhotesPage";
 import { LoginPage } from "../../pages/LoginPage";
