@@ -1,6 +1,8 @@
 package com.vinicius.backend.config;
 
 import com.vinicius.backend.security.JwtAuthFilter;
+import com.vinicius.backend.security.RestAccessDeniedHandler;
+import com.vinicius.backend.security.RestAuthenticationEntryPoint;
 import com.vinicius.backend.security.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +22,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -34,12 +37,12 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
     private final UserDetailsServiceImpl userDetailsService;
+    private final RestAuthenticationEntryPoint authenticationEntryPoint;
+    private final RestAccessDeniedHandler accessDeniedHandler;
 
-    // Injetar as origens CORS do application.properties
     @Value("${app.cors.allowed-origins}")
     private String allowedOrigins;
 
-    // Injetar o tempo máximo de cache do CORS (em segundos)
     @Value("${app.cors.max-age:3600}")
     private long corsMaxAge;
 
@@ -51,40 +54,32 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler)
+                )
                 .authorizeHttpRequests(auth -> auth
-                        // 1. ENDPOINTS DE AUTENTICAÇÃO (PÚBLICOS)
-                        .requestMatchers("/api/auth/**").permitAll()
-
-                        // 2. DOCUMENTAÇÃO E MONITORAMENTO (PÚBLICOS)
-                        .requestMatchers("/api/health", "/api/info").permitAll()
-                        .requestMatchers(
-                                "/v3/api-docs/**",
-                                "/v3/api-docs.yaml",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/swagger-resources/**",
-                                "/webjars/**"
-                        ).permitAll()
-
-                        // 3. REGRAS DE NEGÓCIO ESPECÍFICAS
-                        // Cadastro de usuário
-                        .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
-
-                        // Cães: Leitura pública, Escrita autenticada
-                        .requestMatchers(HttpMethod.GET, "/api/caes/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/caes/**").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/api/caes/**").authenticated()
-                        .requestMatchers(HttpMethod.PATCH, "/api/caes/**").authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "/api/caes/**").authenticated()
-
-                        // FAQ: Leitura pública, Escrita/Modificação autenticada
-                        .requestMatchers(HttpMethod.GET, "/api/faq/**").permitAll() // ✅ FAQ Público liberado!
-                        .requestMatchers(HttpMethod.POST, "/api/faq/**").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/api/faq/**").authenticated()
-                        .requestMatchers(HttpMethod.PATCH, "/api/faq/**").authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "/api/faq/**").authenticated()
-
-                        // 4. REGRA GERAL (SEMPRE POR ÚLTIMO)
+                        .requestMatchers(new AntPathRequestMatcher("/api/auth/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/contato", "POST")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/health")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/info")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/v3/api-docs/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/v3/api-docs.yaml")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/swagger-ui/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/swagger-ui.html")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/swagger-resources/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/webjars/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/usuarios", "POST")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/caes/**", "GET")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/faq/**", "GET")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/caes/**", "POST")).authenticated()
+                        .requestMatchers(new AntPathRequestMatcher("/api/caes/**", "PUT")).authenticated()
+                        .requestMatchers(new AntPathRequestMatcher("/api/caes/**", "PATCH")).authenticated()
+                        .requestMatchers(new AntPathRequestMatcher("/api/caes/**", "DELETE")).authenticated()
+                        .requestMatchers(new AntPathRequestMatcher("/api/faq/**", "POST")).authenticated()
+                        .requestMatchers(new AntPathRequestMatcher("/api/faq/**", "PUT")).authenticated()
+                        .requestMatchers(new AntPathRequestMatcher("/api/faq/**", "PATCH")).authenticated()
+                        .requestMatchers(new AntPathRequestMatcher("/api/faq/**", "DELETE")).authenticated()
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
@@ -93,43 +88,24 @@ public class SecurityConfig {
         return http.build();
     }
 
-    /**
-     * Configuração dinâmica de CORS baseada em propriedades
-     * Permite múltiplas origens e define headers/métodos permitidos
-     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Origens permitidas (lidas do application.properties)
         List<String> origins = Arrays.asList(allowedOrigins.split(","));
         configuration.setAllowedOrigins(origins);
-
-        // Métodos HTTP permitidos
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-
-        // Headers permitidos (Authorization é obrigatório para JWT)
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "X-Requested-With"));
-
-        // Headers expostos ao cliente
         configuration.setExposedHeaders(Arrays.asList("Authorization", "X-Total-Count"));
-
-        // Permite credenciais
         configuration.setAllowCredentials(true);
-
-        // Tempo máximo de cache da preflight request
         configuration.setMaxAge(corsMaxAge);
 
-        // Registra a configuração para todos os endpoints
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
 
         return source;
     }
 
-    /**
-     * Provider de autenticação com DAO
-     */
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
@@ -139,17 +115,11 @@ public class SecurityConfig {
         return provider;
     }
 
-    /**
-     * AuthenticationManager para processar autenticações
-     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
-    /**
-     * Encoder de senha com BCrypt
-     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(10);

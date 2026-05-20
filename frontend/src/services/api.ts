@@ -46,7 +46,7 @@ async function request<T>(
     headers,
   });
 
-  if (response.status === 401) {
+  if (response.status === 401 || response.status === 403) {
     const newToken = await refreshAccessToken();
     if (newToken) {
       headers["Authorization"] = `Bearer ${newToken}`;

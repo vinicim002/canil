@@ -1,7 +1,24 @@
 import { motion } from "framer-motion";
-import { MessageCircle, Mail, Music2, Clock, Send } from "lucide-react";
+import { MessageCircle, Mail, Music2, Clock, Send, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { useContatoForm } from "../../hooks/useContatoForm";
+
+const inputClass =
+  "w-full bg-cream/50 border border-brown/10 rounded-2xl py-4 px-6 text-brown font-bold text-sm outline-none focus:border-orange focus:ring-2 focus:ring-orange/10 transition-all";
+const inputErrorClass =
+  "w-full bg-cream/50 border border-red-300 rounded-2xl py-4 px-6 text-brown font-bold text-sm outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 transition-all";
 
 export function ContatoPage() {
+  const {
+    form,
+    erros,
+    carregando,
+    sucesso,
+    erroGeral,
+    assuntos,
+    atualizar,
+    enviar,
+  } = useContatoForm();
+
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     whileInView: { opacity: 1, y: 0 },
@@ -12,7 +29,6 @@ export function ContatoPage() {
   return (
     <main className="contato-page pt-32 pb-20 bg-cream/20">
       <div className="max-w-[1440px] mx-auto px-4 md:px-8 lg:px-12 flex flex-col gap-20">
-        {/* Header */}
         <motion.header
           {...fadeInUp}
           className="contato-header flex flex-col items-center gap-6 text-center"
@@ -32,13 +48,12 @@ export function ContatoPage() {
           </p>
         </motion.header>
 
-        {/* Conteudo Principal */}
         <div className="flex flex-col lg:flex-row items-start gap-12 lg:gap-20">
-          {/* Formulario Animado */}
           <motion.form
             {...fadeInUp}
             className="contato-formulario w-full lg:w-1/2 bg-white rounded-[3rem] p-8 md:p-12 shadow-xl shadow-brown/5 flex flex-col gap-8"
-            onSubmit={(e) => e.preventDefault()}
+            onSubmit={enviar}
+            noValidate
           >
             <div className="flex flex-col gap-2">
               <h2 className="font-cmas-play text-brown text-4xl font-bold uppercase">
@@ -47,54 +62,49 @@ export function ContatoPage() {
               <div className="h-1 w-20 bg-orange rounded-full" />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="flex flex-col gap-2">
-                <label
-                  htmlFor="nome"
-                  className="text-brown/60 font-black text-[10px] uppercase tracking-widest px-1"
-                >
-                  Nome completo
-                </label>
-                <input
-                  id="nome"
-                  type="text"
-                  placeholder="Seu nome"
-                  className="w-full bg-cream/50 border border-brown/10 rounded-2xl py-4 px-6 text-brown font-bold text-sm outline-none focus:border-orange focus:ring-2 focus:ring-orange/10 transition-all"
-                />
+            {sucesso && (
+              <div className="flex items-center gap-3 bg-green-50 border border-green-200 text-green-800 rounded-2xl px-5 py-4 text-sm font-medium">
+                <CheckCircle size={20} className="shrink-0" />
+                Mensagem enviada com sucesso! Retornaremos em breve.
               </div>
+            )}
 
-              <div className="flex flex-col gap-2">
-                <label
-                  htmlFor="email"
-                  className="text-brown/60 font-black text-[10px] uppercase tracking-widest px-1"
-                >
-                  E-mail
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  placeholder="seu@email.com"
-                  className="w-full bg-cream/50 border border-brown/10 rounded-2xl py-4 px-6 text-brown font-bold text-sm outline-none focus:border-orange focus:ring-2 focus:ring-orange/10 transition-all"
-                />
+            {erroGeral && (
+              <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 rounded-2xl px-5 py-4 text-sm font-medium">
+                <AlertCircle size={20} className="shrink-0" />
+                {erroGeral}
               </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Campo
+                id="nome"
+                label="Nome completo"
+                erro={erros.nome}
+                value={form.nome}
+                onChange={(v) => atualizar("nome", v)}
+                placeholder="Seu nome"
+              />
+              <Campo
+                id="email"
+                label="E-mail"
+                tipo="email"
+                erro={erros.email}
+                value={form.email}
+                onChange={(v) => atualizar("email", v)}
+                placeholder="seu@email.com"
+              />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="flex flex-col gap-2">
-                <label
-                  htmlFor="telefone"
-                  className="text-brown/60 font-black text-[10px] uppercase tracking-widest px-1"
-                >
-                  Telefone
-                </label>
-                <input
-                  id="telefone"
-                  type="tel"
-                  placeholder="(00) 00000-0000"
-                  className="w-full bg-cream/50 border border-brown/10 rounded-2xl py-4 px-6 text-brown font-bold text-sm outline-none focus:border-orange focus:ring-2 focus:ring-orange/10 transition-all"
-                />
-              </div>
-
+              <Campo
+                id="telefone"
+                label="Telefone"
+                tipo="tel"
+                value={form.telefone}
+                onChange={(v) => atualizar("telefone", v)}
+                placeholder="(00) 00000-0000"
+              />
               <div className="flex flex-col gap-2">
                 <label
                   htmlFor="assunto"
@@ -104,14 +114,22 @@ export function ContatoPage() {
                 </label>
                 <select
                   id="assunto"
-                  className="w-full bg-cream/50 border border-brown/10 rounded-2xl py-4 px-6 text-brown font-bold text-sm outline-none focus:border-orange appearance-none transition-all cursor-pointer"
+                  value={form.assunto}
+                  onChange={(e) => atualizar("assunto", e.target.value)}
+                  className={erros.assunto ? inputErrorClass : `${inputClass} appearance-none cursor-pointer`}
                 >
                   <option value="">Selecione um assunto</option>
-                  <option value="reserva">Reservar filhote</option>
-                  <option value="duvida">Dúvidas gerais</option>
-                  <option value="entrega">Entrega e logística</option>
-                  <option value="garantia">Política de garantia</option>
+                  {assuntos.map((a) => (
+                    <option key={a} value={a}>
+                      {a}
+                    </option>
+                  ))}
                 </select>
+                {erros.assunto && (
+                  <span className="text-red-500 text-xs font-medium px-1">
+                    {erros.assunto}
+                  </span>
+                )}
               </div>
             </div>
 
@@ -124,24 +142,40 @@ export function ContatoPage() {
               </label>
               <textarea
                 id="mensagem"
+                value={form.mensagem}
+                onChange={(e) => atualizar("mensagem", e.target.value)}
                 placeholder="Escreva sua mensagem aqui..."
                 rows={4}
-                className="w-full bg-cream/50 border border-brown/10 rounded-2xl py-4 px-6 text-brown font-bold text-sm outline-none focus:border-orange focus:ring-2 focus:ring-orange/10 transition-all resize-none"
+                className={`${erros.mensagem ? inputErrorClass : inputClass} resize-none`}
               />
+              {erros.mensagem && (
+                <span className="text-red-500 text-xs font-medium px-1">
+                  {erros.mensagem}
+                </span>
+              )}
             </div>
 
             <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={carregando ? {} : { scale: 1.02 }}
+              whileTap={carregando ? {} : { scale: 0.98 }}
               type="submit"
-              className="bg-brown text-white font-black py-5 px-10 rounded-full cursor-pointer hover:bg-orange transition-all w-full flex items-center justify-center gap-3 uppercase tracking-[0.2em] text-xs shadow-xl shadow-brown/20"
+              disabled={carregando}
+              className="bg-brown text-white font-black py-5 px-10 rounded-full cursor-pointer hover:bg-orange transition-all w-full flex items-center justify-center gap-3 uppercase tracking-[0.2em] text-xs shadow-xl shadow-brown/20 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              <Send size={18} />
-              Enviar mensagem
+              {carregando ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  Enviando...
+                </>
+              ) : (
+                <>
+                  <Send size={18} />
+                  Enviar mensagem
+                </>
+              )}
             </motion.button>
           </motion.form>
 
-          {/* Info Cards */}
           <div className="contato-info w-full lg:w-1/2 flex flex-col gap-10">
             <div className="flex flex-col gap-2">
               <h2 className="font-cmas-play text-brown text-4xl font-bold uppercase">
@@ -174,7 +208,7 @@ export function ContatoPage() {
                   sub: "Resposta em até 24h",
                 },
                 {
-                  icon: <Music2  />,
+                  icon: <Music2 />,
                   title: "Instagram",
                   info: "@canilaltabelavista",
                   sub: "Novidades diárias",
@@ -212,7 +246,6 @@ export function ContatoPage() {
               ))}
             </motion.div>
 
-            {/* Horario de Atendimento */}
             <motion.div
               {...fadeInUp}
               className="bg-brown rounded-[3rem] p-10 flex flex-col gap-6 shadow-2xl text-white"
@@ -250,5 +283,45 @@ export function ContatoPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+function Campo({
+  id,
+  label,
+  value,
+  onChange,
+  placeholder,
+  tipo = "text",
+  erro,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+  tipo?: string;
+  erro?: string;
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <label
+        htmlFor={id}
+        className="text-brown/60 font-black text-[10px] uppercase tracking-widest px-1"
+      >
+        {label}
+      </label>
+      <input
+        id={id}
+        type={tipo}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className={erro ? inputErrorClass : inputClass}
+      />
+      {erro && (
+        <span className="text-red-500 text-xs font-medium px-1">{erro}</span>
+      )}
+    </div>
   );
 }

@@ -6,6 +6,7 @@ import { MainLayout } from "../../layouts/MainLayout";
 import { ContatoPage } from "../../pages/ContatoPage";
 import { FilhotesPage } from "../../pages/FilhotesPage";
 import { LoginPage } from "../../pages/LoginPage";
+import { ClienteRoute } from "../../components/ClienteRoute";
 import { ProtectedRoute } from "../../components/ProtectedRoute";
 import { ClientePage } from "../../pages/ClientePage";
 import { AdminPage } from "../../pages/AdminPage";
@@ -26,9 +27,9 @@ export function MainRouter() {
         <Route
           path="/cliente"
           element={
-            <ProtectedRoute>
+            <ClienteRoute>
               <ClientePage />
-            </ProtectedRoute>
+            </ClienteRoute>
           }
         />
 

@@ -1,6 +1,7 @@
 package com.vinicius.backend.domain.usuario.model;
 
 import com.vinicius.backend.domain.usuario.enums.Role;
+import com.vinicius.backend.domain.usuario.enums.StatusUsuario;
 import com.vinicius.backend.domain.cliente.model.PerfilCliente;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -39,6 +40,11 @@ public class Usuario {
     private Role role;
 
     private Boolean ativo = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private StatusUsuario status = StatusUsuario.PENDENTE;
 
     // Relacionamento 1:1 com os dados detalhados (se for cliente)
     @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

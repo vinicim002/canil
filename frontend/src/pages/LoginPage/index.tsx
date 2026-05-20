@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
+import { authService } from "../../services/authService";
 import { LoginVisual } from "../../components/LoginVisual/LoginVisual";
 import { AuthFormHeader } from "../../components/AuthFormHeader/AuthFormHeader";
 import { FeedbackMessage } from "../../components/FeedbackMessage/FeedbackMessage";
@@ -50,17 +51,10 @@ export function LoginPage() {
     setCarregando(true);
 
     try {
-      const response = await fetch("http://localhost:8080/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nome, email, senha, telefone }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Erro ao registrar");
-      }
-
-      setSucesso("Cadastro realizado! Faça login para continuar.");
+      await authService.register({ nome, email, senha, telefone });
+      setSucesso(
+        "Cadastro realizado! Faça login para acompanhar o status da sua conta.",
+      );
       setTela("login");
       setErro("");
     } catch {

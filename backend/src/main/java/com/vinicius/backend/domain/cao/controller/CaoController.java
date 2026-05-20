@@ -44,6 +44,16 @@ public class CaoController {
         return ResponseEntity.ok(caoService.listarComFiltros(filtro));
     }
 
+    @GetMapping("/reprodutores")
+    public ResponseEntity<List<CaoResponse>> listarReprodutores() {
+        return ResponseEntity.ok(caoService.listarPorTipo(TipoCao.REPRODUTOR));
+    }
+
+    @GetMapping("/matrizes")
+    public ResponseEntity<List<CaoResponse>> listarMatrizes() {
+        return ResponseEntity.ok(caoService.listarPorTipo(TipoCao.MATRIZ));
+    }
+
     @GetMapping("/disponiveis")
     public ResponseEntity<List<CaoResponse>> listarDisponiveis() {
         return ResponseEntity.ok(caoService.listarDisponiveis());

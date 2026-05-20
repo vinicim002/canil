@@ -1,11 +1,15 @@
 package com.vinicius.backend.domain.usuario.service;
 
+import com.vinicius.backend.domain.usuario.dto.AtualizarStatusRequest;
 import com.vinicius.backend.domain.usuario.dto.UsuarioRequest;
 import com.vinicius.backend.domain.usuario.dto.UsuarioResponse;
 import com.vinicius.backend.domain.usuario.dto.UsuarioUpdateRequest;
+import com.vinicius.backend.domain.usuario.enums.Role;
+import com.vinicius.backend.domain.usuario.enums.StatusUsuario;
 import com.vinicius.backend.domain.usuario.mapper.UsuarioMapper;
 import com.vinicius.backend.domain.usuario.model.Usuario;
 import com.vinicius.backend.domain.usuario.repository.UsuarioRepository;
+import com.vinicius.backend.infrastructure.email.EmailService;
 import com.vinicius.backend.shared.exception.BusinessException;
 import com.vinicius.backend.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +27,7 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final UsuarioMapper usuarioMapper;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     @Transactional
     public UsuarioResponse criar(UsuarioRequest request) {
@@ -44,8 +49,21 @@ public class UsuarioService {
     }
 
     @Transactional(readOnly = true)
+    public List<UsuarioResponse> listarClientes() {
+        return usuarioRepository.findByRoleOrderByCriadoEmDesc(Role.CLIENTE)
+                .stream()
+                .map(usuarioMapper::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public UsuarioResponse buscarPorId(UUID id) {
         return usuarioMapper.toResponse(buscarEntidadePorId(id));
+    }
+
+    @Transactional(readOnly = true)
+    public UsuarioResponse buscarPorEmail(String email) {
+        return usuarioMapper.toResponse(buscarEntidadePorEmail(email));
     }
 
     @Transactional
@@ -60,7 +78,47 @@ public class UsuarioService {
     public void desativar(UUID id) {
         Usuario usuario = buscarEntidadePorId(id);
         usuario.setAtivo(false);
+        usuario.setStatus(StatusUsuario.REJEITADO);
         usuarioRepository.save(usuario);
+    }
+
+    @Transactional
+    public UsuarioResponse aprovar(UUID id) {
+        Usuario usuario = buscarEntidadePorId(id);
+        validarCliente(usuario);
+        usuario.setStatus(StatusUsuario.APROVADO);
+        usuario.setAtivo(true);
+        Usuario salvo = usuarioRepository.save(usuario);
+        emailService.enviarAprovacaoCliente(salvo.getNome(), salvo.getEmail());
+        return usuarioMapper.toResponse(salvo);
+    }
+
+    @Transactional
+    public UsuarioResponse atualizarStatus(UUID id, AtualizarStatusRequest request) {
+        Usuario usuario = buscarEntidadePorId(id);
+        validarCliente(usuario);
+        usuario.setStatus(request.status());
+        usuario.setAtivo(request.status() == StatusUsuario.APROVADO);
+        Usuario salvo = usuarioRepository.save(usuario);
+        if (request.status() == StatusUsuario.APROVADO) {
+            emailService.enviarAprovacaoCliente(salvo.getNome(), salvo.getEmail());
+        }
+        return usuarioMapper.toResponse(salvo);
+    }
+
+    public void verificarClienteAprovado(Usuario usuario) {
+        if (usuario.getRole() != Role.CLIENTE) {
+            return;
+        }
+        if (usuario.getStatus() != StatusUsuario.APROVADO) {
+            throw new BusinessException("Sua conta ainda não foi aprovada. Aguarde a liberação do administrador.");
+        }
+    }
+
+    private void validarCliente(Usuario usuario) {
+        if (usuario.getRole() != Role.CLIENTE) {
+            throw new BusinessException("Esta operação é válida apenas para clientes.");
+        }
     }
 
     public Usuario buscarEntidadePorId(UUID id) {

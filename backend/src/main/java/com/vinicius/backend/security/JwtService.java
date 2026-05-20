@@ -26,6 +26,7 @@ public class JwtService {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", usuario.getRole().name());
         claims.put("nome", usuario.getNome());
+        claims.put("status", usuario.getStatus().name());
 
         return Jwts.builder()
                 .claims(claims)

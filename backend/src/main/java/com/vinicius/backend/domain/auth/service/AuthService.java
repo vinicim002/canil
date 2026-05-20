@@ -5,6 +5,8 @@ import com.vinicius.backend.domain.auth.dto.LoginResponse;
 import com.vinicius.backend.domain.auth.dto.RefreshTokenRequest;
 import com.vinicius.backend.domain.auth.model.RefreshToken;
 import com.vinicius.backend.domain.auth.repository.RefreshTokenRepository;
+import com.vinicius.backend.domain.usuario.dto.UsuarioRequest;
+import com.vinicius.backend.domain.usuario.dto.UsuarioResponse;
 import com.vinicius.backend.domain.usuario.model.Usuario;
 import com.vinicius.backend.domain.usuario.service.UsuarioService;
 import com.vinicius.backend.security.JwtService;
@@ -32,6 +34,11 @@ public class AuthService {
     private Long refreshExpiration;
 
     @Transactional
+    public UsuarioResponse register(UsuarioRequest request) {
+        return usuarioService.criar(request);
+    }
+
+    @Transactional
     public LoginResponse login(LoginRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.email(), request.senha())
@@ -50,7 +57,8 @@ public class AuthService {
                 usuario.getId(),
                 usuario.getNome(),
                 usuario.getEmail(),
-                usuario.getRole()
+                usuario.getRole(),
+                usuario.getStatus()
         );
     }
 
@@ -80,7 +88,8 @@ public class AuthService {
                 usuario.getId(),
                 usuario.getNome(),
                 usuario.getEmail(),
-                usuario.getRole()
+                usuario.getRole(),
+                usuario.getStatus()
         );
     }
 

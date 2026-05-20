@@ -14,11 +14,12 @@ export function NossosCaesPage() {
   useEffect(() => {
     async function loadData() {
       try {
-        const data = await caoService.listarTodos();
-        if (Array.isArray(data)) {
-          setReprodutores(data.filter((cao) => cao.genero === "MACHO"));
-          setMatrizes(data.filter((cao) => cao.genero === "FÊMEA"));
-        }
+        const [reprodutoresData, matrizesData] = await Promise.all([
+          caoService.listarPorTipo("REPRODUTOR"),
+          caoService.listarPorTipo("MATRIZ"),
+        ]);
+        setReprodutores(Array.isArray(reprodutoresData) ? reprodutoresData : []);
+        setMatrizes(Array.isArray(matrizesData) ? matrizesData : []);
       } catch (error) {
         console.error("Erro ao carregar cães:", error);
       } finally {

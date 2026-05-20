@@ -1,7 +1,12 @@
 package com.vinicius.backend.shared.exception;
 
+import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -21,6 +26,36 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<Map<String, Object>> handleBusiness(BusinessException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler({BadCredentialsException.class})
+    public ResponseEntity<Map<String, Object>> handleBadCredentials(BadCredentialsException ex) {
+        return buildResponse(HttpStatus.UNAUTHORIZED, "Email ou senha incorretos.");
+    }
+
+    @ExceptionHandler({DisabledException.class})
+    public ResponseEntity<Map<String, Object>> handleDisabled(DisabledException ex) {
+        return buildResponse(HttpStatus.UNAUTHORIZED, "Usuário desativado.");
+    }
+
+    @ExceptionHandler({AuthenticationException.class})
+    public ResponseEntity<Map<String, Object>> handleAuthentication(AuthenticationException ex) {
+        return buildResponse(HttpStatus.UNAUTHORIZED, "Falha na autenticação.");
+    }
+
+    @ExceptionHandler({AccessDeniedException.class})
+    public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex) {
+        return buildResponse(HttpStatus.FORBIDDEN, "Acesso negado.");
+    }
+
+    @ExceptionHandler({JwtException.class})
+    public ResponseEntity<Map<String, Object>> handleJwt(JwtException ex) {
+        return buildResponse(HttpStatus.UNAUTHORIZED, "Token inválido ou expirado.");
+    }
+
+    @ExceptionHandler({IllegalArgumentException.class})
+    public ResponseEntity<Map<String, Object>> handleIllegalArgument(IllegalArgumentException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 

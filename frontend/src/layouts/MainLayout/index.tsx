@@ -6,7 +6,8 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const isAdmin = location.pathname.startsWith("/admin");
   const isLogin = location.pathname === "/login";
-  const esconderLayout = isAdmin || isLogin || location.pathname === "/cliente";
+  const isClienteArea = location.pathname === "/cliente";
+  const esconderLayout = isAdmin || isLogin || isClienteArea;
 
   return (
     <div className="main-layout">

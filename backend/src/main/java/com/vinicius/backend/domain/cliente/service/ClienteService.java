@@ -35,6 +35,7 @@ public class ClienteService {
         }
 
         Usuario usuario = usuarioService.buscarEntidadePorId(usuarioId);
+        usuarioService.verificarClienteAprovado(usuario);
 
         PerfilCliente perfil = PerfilCliente.builder()
                 .usuario(usuario)
@@ -51,6 +52,7 @@ public class ClienteService {
 
     @Transactional(readOnly = true)
     public ClienteResponse buscarMeuPerfil(UUID usuarioId) {
+        usuarioService.verificarClienteAprovado(usuarioService.buscarEntidadePorId(usuarioId));
         return clienteMapper.toResponse(buscarEntidadePorUsuarioId(usuarioId));
     }
 
@@ -72,6 +74,7 @@ public class ClienteService {
 
     @Transactional
     public ClienteResponse atualizar(UUID usuarioId, ClienteRequest request) {
+        usuarioService.verificarClienteAprovado(usuarioService.buscarEntidadePorId(usuarioId));
         PerfilCliente perfil = buscarEntidadePorUsuarioId(usuarioId);
 
         if (request.cpf() != null &&

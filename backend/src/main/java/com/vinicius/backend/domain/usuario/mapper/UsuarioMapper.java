@@ -3,6 +3,7 @@ package com.vinicius.backend.domain.usuario.mapper;
 import com.vinicius.backend.domain.usuario.dto.UsuarioRequest;
 import com.vinicius.backend.domain.usuario.dto.UsuarioResponse;
 import com.vinicius.backend.domain.usuario.enums.Role;
+import com.vinicius.backend.domain.usuario.enums.StatusUsuario;
 import com.vinicius.backend.domain.usuario.model.Usuario;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +18,7 @@ public class UsuarioMapper {
                 .telefone(request.telefone())
                 .role(Role.CLIENTE)
                 .ativo(true)
+                .status(StatusUsuario.PENDENTE)
                 .build();
     }
 
@@ -28,6 +30,7 @@ public class UsuarioMapper {
                 usuario.getTelefone(),
                 usuario.getRole(),
                 usuario.getAtivo(),
+                usuario.getStatus(),
                 usuario.getCriadoEm()
         );
     }

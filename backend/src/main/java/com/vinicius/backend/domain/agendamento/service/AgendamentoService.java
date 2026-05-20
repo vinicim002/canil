@@ -31,6 +31,7 @@ public class AgendamentoService {
     @Transactional
     public AgendamentoResponse criar(UUID usuarioId, AgendamentoRequest request) {
         Usuario usuario = usuarioService.buscarEntidadePorId(usuarioId);
+        usuarioService.verificarClienteAprovado(usuario);
 
         if (agendamentoRepository.existsByDataHoraBetween(
                 request.dataHora().minusMinutes(30),

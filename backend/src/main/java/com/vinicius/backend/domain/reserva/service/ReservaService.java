@@ -44,6 +44,7 @@ public class ReservaService {
         }
 
         Usuario usuario = usuarioService.buscarEntidadePorId(usuarioId);
+        usuarioService.verificarClienteAprovado(usuario);
 
         Reserva reserva = Reserva.builder()
                 .usuario(usuario)

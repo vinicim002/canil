@@ -1,3 +1,15 @@
+export const statusUsuarioColor: Record<string, string> = {
+  PENDENTE: "bg-yellow-100 text-yellow-700",
+  APROVADO: "bg-green-100 text-green-700",
+  REJEITADO: "bg-red-100 text-red-700",
+};
+
+export const statusUsuarioLabel: Record<string, string> = {
+  PENDENTE: "Pendente",
+  APROVADO: "Aprovado",
+  REJEITADO: "Rejeitado",
+};
+
 export const statusReservaColor: Record<string, string> = {
   APROVADA: "bg-green-100 text-green-700",
   SOLICITADA: "bg-yellow-100 text-yellow-700",
