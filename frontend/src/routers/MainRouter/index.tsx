@@ -4,6 +4,8 @@ import { SobrePage } from "../../pages/SobrePage";
 import { NossosCaesPage } from "../../pages/NossosCaesPage";
 import { MainLayout } from "../../layouts/MainLayout";
 import { ContatoPage } from "../../pages/ContatoPage";
+import { AgendarVisitaPage } from "../../pages/AgendarVisitaPage";
+import { AgendamentoGestaoPage } from "../../pages/AgendamentoGestaoPage";
 import { FilhotesPage } from "../../pages/FilhotesPage";
 import { LoginPage } from "../../pages/LoginPage";
 import { ClienteRoute } from "../../components/ClienteRoute";
@@ -22,6 +24,8 @@ export function MainRouter() {
         <Route path="/nossos-caes" element={<NossosCaesPage />} />
         <Route path="/filhotes" element={<FilhotesPage />} />
         <Route path="/contato" element={<ContatoPage />} />
+        <Route path="/agendar-visita" element={<AgendarVisitaPage />} />
+        <Route path="/agendamento/:token" element={<AgendamentoGestaoPage />} />
         <Route path="/login" element={<LoginPage />} />
 
         <Route

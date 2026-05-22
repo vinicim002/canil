@@ -24,5 +24,39 @@ services:
       - postgres
     restart: unless-stopped
 
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: canil_n8n
+    ports:
+      - "5678:5678"
+
+    environment:
+      - GENERIC_TIMEZONE=America/Sao_Paulo
+      - TZ=America/Sao_Paulo
+
+      # Banco interno do n8n (usa seu postgres existente)
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=canil_db
+      - DB_POSTGRESDB_USER=canil_user
+      - DB_POSTGRESDB_PASSWORD=canil_pass
+
+      # Segurança básica (recomendado)
+      - N8N_ENCRYPTION_KEY=canil_secret_key_123
+
+      # URL base (importante pra webhooks)
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
 volumes:
   canil_postgres_data:
+  n8n_data:

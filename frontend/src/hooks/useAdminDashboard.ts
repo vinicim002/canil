@@ -59,7 +59,7 @@ export function useAdminDashboard() {
         api.get<CaoResponse[]>("/caes?tipo=REPRODUTOR"),
         api.get<ReservaResponse[]>("/reservas"),
         api.get<unknown[]>("/clientes"),
-        api.get<unknown[]>("/agendamentos"),
+        api.get<Array<{ status: string }>>("/admin/visitas"),
       ]);
 
       const caes = [...matrizes, ...reprodutores];
@@ -74,9 +74,9 @@ export function useAdminDashboard() {
             r.status === "APROVADA",
         ).length,
         clientesCadastrados: clientes.length,
-        agendamentosPendentes: (
-          agendamentos as Array<{ status: string }>
-        ).filter((a) => a.status === "PENDENTE").length,
+        agendamentosPendentes: agendamentos.filter(
+          (a) => a.status === "PENDENTE" || a.status === "REAGENDADO",
+        ).length,
       });
 
       setReservasRecentes(ordenarPorDataRecente(reservas).slice(0, 5));

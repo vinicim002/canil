@@ -72,6 +72,8 @@ public class SecurityConfig {
                         .requestMatchers(new AntPathRequestMatcher("/api/usuarios", "POST")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/caes/**", "GET")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/faq/**", "GET")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/public/visitas/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/webhooks/n8n/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/caes/**", "POST")).authenticated()
                         .requestMatchers(new AntPathRequestMatcher("/api/caes/**", "PUT")).authenticated()
                         .requestMatchers(new AntPathRequestMatcher("/api/caes/**", "PATCH")).authenticated()

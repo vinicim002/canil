@@ -104,4 +104,52 @@ public class EmailTemplateRenderer {
         );
         return render("Contato — " + dados.get("assunto"), conteudo, siteName, siteUrl);
     }
+
+    public String renderVisitaConfirmacao(
+            String nome,
+            String dataHoraFormatada,
+            String linkGerenciamento,
+            String tituloEvento,
+            String siteName,
+            String siteUrl
+    ) {
+        String conteudo = """
+                <h2 style="margin:0 0 16px;color:%s;font-size:22px;">%s</h2>
+                <p style="margin:0 0 16px;">Olá, <strong>%s</strong>!</p>
+                <p style="margin:0 0 8px;">Sua visita ao canil está prevista para:</p>
+                <p style="margin:0 0 24px;font-size:18px;font-weight:700;color:%s;">%s</p>
+                <p style="margin:0 0 24px;">Use o link abaixo para ver, reagendar ou cancelar seu agendamento:</p>
+                <table role="presentation" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td style="border-radius:999px;background:%s;">
+                      <a href="%s" style="display:inline-block;padding:14px 32px;color:#ffffff;font-weight:700;text-decoration:none;font-size:14px;">GERENCIAR AGENDAMENTO</a>
+                    </td>
+                  </tr>
+                </table>
+                """.formatted(
+                BRAND_BROWN,
+                tituloEvento,
+                nome,
+                BRAND_ORANGE,
+                dataHoraFormatada,
+                BRAND_BROWN,
+                linkGerenciamento
+        );
+        return render(tituloEvento, conteudo, siteName, siteUrl);
+    }
+
+    public String renderVisitaCancelamento(
+            String nome,
+            String dataHoraFormatada,
+            String siteName,
+            String siteUrl
+    ) {
+        String conteudo = """
+                <h2 style="margin:0 0 16px;color:%s;font-size:22px;">Visita cancelada</h2>
+                <p style="margin:0 0 16px;">Olá, <strong>%s</strong>.</p>
+                <p style="margin:0 0 8px;">Confirmamos o cancelamento da visita prevista para <strong>%s</strong>.</p>
+                <p style="margin:0;">Para agendar novamente, entre em contato conosco pelo WhatsApp.</p>
+                """.formatted(BRAND_BROWN, nome, dataHoraFormatada);
+        return render("Visita cancelada", conteudo, siteName, siteUrl);
+    }
 }

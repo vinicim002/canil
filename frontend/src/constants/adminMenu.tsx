@@ -55,7 +55,7 @@ export const adminPageTitles: Record<string, string> = {
   "/admin/filhotes": "Ninhadas e Filhotes",
   "/admin/reservas": "Controle de Reservas",
   "/admin/clientes": "Base de Clientes",
-  "/admin/agendamentos": "Agenda de Visitas",
+  "/admin/agendamentos": "Visitas e Bloqueios",
   "/admin/depoimentos": "Depoimentos",
   "/admin/faq": "Dúvidas Frequentes",
   "/admin/configuracoes": "Configurações do Sistema",

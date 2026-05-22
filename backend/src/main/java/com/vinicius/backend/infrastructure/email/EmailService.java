@@ -2,7 +2,12 @@ package com.vinicius.backend.infrastructure.email;
 
 import com.vinicius.backend.config.MailProperties;
 import com.vinicius.backend.domain.contato.dto.ContatoRequest;
+import com.vinicius.backend.domain.visita.dto.VisitaResponse;
+import com.vinicius.backend.infrastructure.n8n.TipoEventoVisita;
 import com.vinicius.backend.shared.exception.BusinessException;
+
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -42,6 +47,38 @@ public class EmailService {
         enviar(emailDestino, "Sua conta foi aprovada — " + mailProperties.getSiteName(), html);
     }
 
+    public void enviarConfirmacaoVisita(VisitaResponse visita, TipoEventoVisita evento) {
+        String titulo = switch (evento) {
+            case VISITA_CRIADA -> "Visita agendada";
+            case VISITA_REAGENDADA -> "Visita reagendada";
+            case VISITA_CONFIRMADA -> "Visita confirmada";
+            default -> "Atualização da sua visita";
+        };
+        String dataFormatada = visita.dataHora()
+                .format(DateTimeFormatter.ofPattern("dd/MM/yyyy 'às' HH:mm", new Locale("pt", "BR")));
+        String html = templateRenderer.renderVisitaConfirmacao(
+                visita.nome(),
+                dataFormatada,
+                visita.linkGerenciamento(),
+                titulo,
+                mailProperties.getSiteName(),
+                mailProperties.getSiteUrl()
+        );
+        enviarSilencioso(visita.email(), titulo + " — " + mailProperties.getSiteName(), html);
+    }
+
+    public void enviarCancelamentoVisita(VisitaResponse visita) {
+        String dataFormatada = visita.dataHora()
+                .format(DateTimeFormatter.ofPattern("dd/MM/yyyy 'às' HH:mm", new Locale("pt", "BR")));
+        String html = templateRenderer.renderVisitaCancelamento(
+                visita.nome(),
+                dataFormatada,
+                mailProperties.getSiteName(),
+                mailProperties.getSiteUrl()
+        );
+        enviarSilencioso(visita.email(), "Visita cancelada — " + mailProperties.getSiteName(), html);
+    }
+
     public void enviarContato(ContatoRequest request) {
         Map<String, String> dados = Map.of(
                 "nome", request.nome(),
@@ -59,9 +96,16 @@ public class EmailService {
     }
 
     private void enviar(String para, String assunto, String html) {
+        if (!enviarSilencioso(para, assunto, html)) {
+            throw new BusinessException("Não foi possível enviar o e-mail. Tente novamente mais tarde.");
+        }
+    }
+
+    /** @return true se enviou ou estava desabilitado; false se falhou */
+    private boolean enviarSilencioso(String para, String assunto, String html) {
         if (!mailProperties.isEnabled() || mailSender.isEmpty()) {
             log.info("[Email desabilitado] Para: {} | Assunto: {}", para, assunto);
-            return;
+            return true;
         }
 
         try {
@@ -73,9 +117,10 @@ public class EmailService {
             helper.setText(html, true);
             mailSender.get().send(message);
             log.info("E-mail enviado para {}", para);
+            return true;
         } catch (MessagingException e) {
             log.error("Falha ao enviar e-mail para {}: {}", para, e.getMessage());
-            throw new BusinessException("Não foi possível enviar o e-mail. Tente novamente mais tarde.");
+            return false;
         }
     }
 }
