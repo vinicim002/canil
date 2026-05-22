@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import pataImg from "../../assets/pata.png";
+import { WHATSAPP_CANIL_NUMERO } from "../../constants/whatsapp";
 
 export function ProximoPasso() {
   return (
@@ -100,7 +101,7 @@ export function ProximoPasso() {
           transition={{ duration: 0.6, delay: 0.4 }}
         >
           <motion.a
-            href="https://wa.me/YOUR_PHONE_NUMBER"
+            href={`https://wa.me/${WHATSAPP_CANIL_NUMERO}`}
             target="_blank"
             rel="noopener noreferrer"
             className="proximo-passo-btn-whatsapp w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white font-bold py-3 md:py-4 px-6 md:px-8 rounded-full cursor-pointer text-center transition-colors duration-300 shadow-lg flex items-center justify-center gap-2"

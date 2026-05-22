@@ -17,7 +17,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const e = $input.first().json;\nlet texto = '';\nswitch (e.evento) {\n  case 'VISITA_CRIADA':\n    texto = `Olá, ${e.nome}! 🐶\\n\\nSua visita ao ${e.siteName} foi agendada.\\n\\nGerencie pelo link:\\n${e.linkGerenciamento}`;\n    break;\n  case 'VISITA_REAGENDADA':\n    texto = `Olá, ${e.nome}! Sua visita foi reagendada.\\n\\n${e.linkGerenciamento}`;\n    break;\n  case 'VISITA_CANCELADA':\n    texto = `Olá, ${e.nome}. Sua visita foi cancelada. Para marcar de novo, fale conosco no WhatsApp.`;\n    break;\n  case 'VISITA_CONFIRMADA':\n    texto = `Olá, ${e.nome}! ✅ Visita confirmada.\\n\\n${e.linkGerenciamento}`;\n    break;\n  case 'VISITA_LEMBRETE':\n    texto = `Olá, ${e.nome}! Lembrete: você tem visita agendada em breve.\\n\\n${e.linkGerenciamento}`;\n    break;\n  default:\n    texto = `Olá, ${e.nome}! ${e.linkGerenciamento || ''}`;\n}\nreturn [{ json: { ...e, textoWhatsApp: texto } }];"
+        "jsCode": "const raw = $input.first().json;\nconst e = raw.body ?? raw;\nlet texto = '';\nswitch (e.evento) {\n  case 'VISITA_CRIADA':\n    texto = `Olá, ${e.nome}! 🐶\\n\\nSua visita ao ${e.siteName} foi agendada.\\n\\n${e.linkGerenciamento}\\n\\nToque no link acima para reagendar ou cancelar.`;\n    break;\n  case 'VISITA_REAGENDADA':\n    texto = `Olá, ${e.nome}! Sua visita foi reagendada.\\n\\n${e.linkGerenciamento}`;\n    break;\n  case 'VISITA_CANCELADA':\n    texto = `Olá, ${e.nome}. Sua visita foi cancelada. Para marcar de novo, fale conosco no WhatsApp.`;\n    break;\n  case 'VISITA_CONFIRMADA':\n    texto = `Olá, ${e.nome}! ✅ Visita confirmada.\\n\\n${e.linkGerenciamento}`;\n    break;\n  case 'VISITA_LEMBRETE':\n    texto = `Olá, ${e.nome}! Lembrete: você tem visita agendada em breve.\\n\\n${e.linkGerenciamento}`;\n    break;\n  default:\n    texto = `Olá, ${e.nome}! ${e.linkGerenciamento || ''}`;\n}\nif (!e.telefoneWhatsApp) throw new Error('telefoneWhatsApp ausente no payload');\nreturn [{ json: { ...e, textoWhatsApp: texto } }];"
       },
       "id": "code-mensagem",
       "name": "Montar mensagem",
@@ -64,5 +64,8 @@
   },
   "active": false,
   "settings": { "executionOrder": "v1" },
-  "meta": { "templateCredsSetupCompleted": true }
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instructions": "Spring POST → este webhook. Evolution: http://evolution-api:8080/message/sendText/canil (rede Docker). Campos: $json.evento, $json.telefoneWhatsApp, $json.textoWhatsApp. Ative o workflow no n8n."
+  }
 }

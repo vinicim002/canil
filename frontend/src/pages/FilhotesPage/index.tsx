@@ -4,12 +4,30 @@ import { DogCard } from "../../components/DogCard";
 import type { CaoResponse } from "../../services/caoService/caoResponse";
 import type { ImagemResponse } from "../../services/imageService/ImagemResponse";
 import { caoService } from "../../services/caoService/caoService";
-import { MessageCircle } from "lucide-react";
+import { reservarFilhoteNoClique } from "../../constants/whatsapp";
+import { Loader2, MessageCircle } from "lucide-react";
 
 export function FilhotesPage() {
   const [machos, setMachos] = useState<CaoResponse[]>([]);
   const [femeas, setFemeas] = useState<CaoResponse[]>([]);
   const [loading, setLoading] = useState(true);
+  const [reservando, setReservando] = useState(false);
+
+  async function handleReservarFilhote() {
+    setReservando(true);
+    try {
+      await reservarFilhoteNoClique();
+    } catch (e) {
+      console.error("Reserva filhote:", e);
+      alert(
+        e instanceof Error
+          ? e.message
+          : "Não foi possível enviar. Verifique se o backend e a Evolution estão rodando.",
+      );
+    } finally {
+      setReservando(false);
+    }
+  }
 
   useEffect(() => {
     async function loadFilhotes() {
@@ -147,12 +165,19 @@ export function FilhotesPage() {
             veterinário. Reservas sujeitas à disponibilidade.
           </p>
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="flex items-center gap-3 bg-brown text-white font-black py-4 px-8 rounded-full cursor-pointer hover:bg-orange transition-all shadow-xl shadow-brown/20 uppercase tracking-widest text-xs mt-2"
+            type="button"
+            onClick={handleReservarFilhote}
+            disabled={reservando}
+            whileHover={{ scale: reservando ? 1 : 1.05 }}
+            whileTap={{ scale: reservando ? 1 : 0.95 }}
+            className="flex items-center gap-3 bg-brown text-white font-black py-4 px-8 rounded-full cursor-pointer hover:bg-orange transition-all shadow-xl shadow-brown/20 uppercase tracking-widest text-xs mt-2 disabled:opacity-60"
           >
-            <MessageCircle size={18} />
-            Reservar filhote
+            {reservando ? (
+              <Loader2 size={18} className="animate-spin" />
+            ) : (
+              <MessageCircle size={18} />
+            )}
+            {reservando ? "Enviando…" : "Reservar filhote"}
           </motion.button>
         </motion.div>
 
@@ -226,6 +251,7 @@ export function FilhotesPage() {
           </motion.div>
         )}
       </div>
+
     </main>
   );
 }

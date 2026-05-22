@@ -1,3 +1,5 @@
+import { WHATSAPP_CANIL_NUMERO } from "../../../constants/whatsapp";
+
 export function ClienteFilhoteCard() {
   return (
     <div className="cliente-filhote-card bg-brown rounded-2xl p-8 flex flex-row items-center gap-8">
@@ -21,7 +23,7 @@ export function ClienteFilhoteCard() {
           desde 05/05/2026
         </span>
         <a
-          href="https://wa.me/5500000000000"
+          href={`https://wa.me/${WHATSAPP_CANIL_NUMERO}`}
           target="_blank"
           rel="noreferrer"
           className="bg-green-500 text-white font-medium text-sm py-2 px-5 rounded-full hover:bg-green-600 transition-colors mt-1"

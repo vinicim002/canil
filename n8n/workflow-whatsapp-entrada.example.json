@@ -1,0 +1,65 @@
+{
+  "name": "Canil — WhatsApp entrada (intents)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "canil-whatsapp-mensagens",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook-evolution",
+      "name": "Webhook Evolution",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 300],
+      "webhookId": "canil-whatsapp-mensagens"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json;\nconst data = body.data ?? body;\nconst key = data.key ?? {};\n\nif (key.fromMe === true || data.fromMe === true) return [];\n\nconst jid = (key.remoteJid || data.remoteJid || '').toString();\nif (!jid || jid.includes('@g.us')) return [];\n\nconst msg = data.message ?? {};\nconst texto = (\n  msg.conversation ||\n  msg.extendedTextMessage?.text ||\n  msg.buttonsResponseMessage?.selectedDisplayText ||\n  ''\n).trim();\n\nconst telefone = jid.replace(/@.*/, '').replace(/\\D/g, '');\nif (!texto || !telefone) return [];\n\nreturn [{ json: { telefone, texto } }];"
+      },
+      "id": "code-extrair",
+      "name": "Extrair mensagem",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [260, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:8080/api/webhooks/n8n/whatsapp/processar",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-Webhook-Secret", "value": "canil-n8n-dev-secret" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ telefone: $json.telefone, texto: $json.texto }) }}",
+        "options": {}
+      },
+      "id": "http-spring",
+      "name": "Spring processar intent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [520, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Evolution": {
+      "main": [[{ "node": "Extrair mensagem", "type": "main", "index": 0 }]]
+    },
+    "Extrair mensagem": {
+      "main": [[{ "node": "Spring processar intent", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instructions": "Evolution MESSAGES_UPSERT → este webhook. Rode scripts/evolution-webhook-whatsapp.sh. Intents: alterar/reagendar visita, cancelar visita, reservar filhote. Spring responde no WhatsApp via Evolution."
+  }
+}

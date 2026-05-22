@@ -39,14 +39,26 @@ public interface VisitaAgendamentoRepository extends JpaRepository<VisitaAgendam
 
     @Query("""
             SELECT v FROM VisitaAgendamento v
-            WHERE v.dataHora > :agora
-            AND v.dataHora <= :ate
+            WHERE v.dataHora > :janelaInicio
+            AND v.dataHora <= :janelaFim
             AND v.status IN :statuses
+            AND v.lembreteEnviadoEm IS NULL
             ORDER BY v.dataHora ASC
             """)
     List<VisitaAgendamento> findVisitasParaLembrete(
+            @Param("janelaInicio") LocalDateTime janelaInicio,
+            @Param("janelaFim") LocalDateTime janelaFim,
+            @Param("statuses") List<StatusAgendamento> statuses
+    );
+
+    @Query("""
+            SELECT v FROM VisitaAgendamento v
+            WHERE v.dataHora > :agora
+            AND v.status IN :statuses
+            ORDER BY v.dataHora ASC
+            """)
+    List<VisitaAgendamento> findAgendamentosFuturosAtivos(
             @Param("agora") LocalDateTime agora,
-            @Param("ate") LocalDateTime ate,
             @Param("statuses") List<StatusAgendamento> statuses
     );
 }

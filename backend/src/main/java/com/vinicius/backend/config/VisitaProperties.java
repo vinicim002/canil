@@ -14,6 +14,11 @@ import java.time.LocalTime;
 public class VisitaProperties {
 
     private String siteUrl = "http://localhost:5173";
+    /**
+     * URL pública para o link no WhatsApp (ngrok, domínio de produção).
+     * Se vazio, usa site-url — localhost não fica clicável no app do celular.
+     */
+    private String whatsappSiteUrl = "";
     private String managementPath = "/agendamento";
     private LocalTime horaInicio = LocalTime.of(9, 0);
     private LocalTime horaFim = LocalTime.of(17, 0);
@@ -22,4 +27,6 @@ public class VisitaProperties {
     private int diasAntecedenciaMaxima = 60;
     /** 1=Segunda … 7=Domingo (ISO). Domingo bloqueado por padrão. */
     private String diasPermitidos = "1,2,3,4,5,6";
+    /** Horas antes da visita para enviar lembrete WhatsApp (padrão 24h). */
+    private int lembreteHorasAntes = 24;
 }

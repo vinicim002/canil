@@ -1,6 +1,7 @@
 package com.vinicius.backend.infrastructure.n8n;
 
 import com.vinicius.backend.config.N8nProperties;
+import com.vinicius.backend.domain.cao.dto.FilhoteReservaIntentResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -15,6 +16,21 @@ public class N8nWebhookClient {
 
     private final N8nProperties n8nProperties;
 
+    public void enviarFilhoteResposta(FilhoteReservaIntentResponse payload) {
+        if (!n8nProperties.isEnabled()) {
+            log.debug("[n8n desabilitado] Resposta filhote ignorada");
+            return;
+        }
+
+        String url = n8nProperties.getWebhookUrlFilhoteResposta();
+        if (url == null || url.isBlank()) {
+            log.warn("[n8n] URL do webhook de resposta filhote não configurada.");
+            return;
+        }
+
+        postJson(url, payload, "resposta filhote");
+    }
+
     public void enviar(VisitaNotificacaoPayload payload) {
         if (!n8nProperties.isEnabled()) {
             log.debug("[n8n desabilitado] Evento {} ignorado", payload.evento());
@@ -27,6 +43,10 @@ public class N8nWebhookClient {
             return;
         }
 
+        postJson(url, payload, "evento " + payload.evento());
+    }
+
+    private void postJson(String url, Object payload, String rotulo) {
         try {
             RestClient client = RestClient.builder()
                     .requestFactory(requestFactory())
@@ -39,9 +59,9 @@ public class N8nWebhookClient {
                     .retrieve()
                     .toBodilessEntity();
 
-            log.info("[n8n] Evento {} enviado para visita {}", payload.evento(), payload.visitaId());
+            log.info("[n8n] {} enviado com sucesso", rotulo);
         } catch (RestClientException e) {
-            log.error("[n8n] Falha ao enviar evento {}: {}", payload.evento(), e.getMessage());
+            log.error("[n8n] Falha ao enviar {}: {}", rotulo, e.getMessage());
         }
     }
 

@@ -27,7 +27,20 @@ public class VisitaMapper {
     }
 
     public String montarLink(String token) {
-        String base = visitaProperties.getSiteUrl().replaceAll("/$", "");
+        return montarLinkComBase(visitaProperties.getSiteUrl(), token);
+    }
+
+    /** Link enviado no WhatsApp — prefere URL pública (https) para ficar clicável no celular. */
+    public String montarLinkWhatsApp(String token) {
+        String base = visitaProperties.getWhatsappSiteUrl();
+        if (base == null || base.isBlank()) {
+            base = visitaProperties.getSiteUrl();
+        }
+        return montarLinkComBase(base, token);
+    }
+
+    private String montarLinkComBase(String baseUrl, String token) {
+        String base = baseUrl.replaceAll("/$", "");
         String path = visitaProperties.getManagementPath();
         if (!path.startsWith("/")) {
             path = "/" + path;

@@ -18,4 +18,6 @@ public interface CaoRepository extends JpaRepository<Cao, UUID>, JpaSpecificatio
     List<Cao> findByDestaqueTrue();
     List<Cao> findByStatusAndTipoPeloAndTamanho(StatusCao status, TipoPelo tipoPelo, Tamanho tamanho);
     List<Cao> findByTipo(TipoCao tipo);
+
+    long countByTipoAndStatus(TipoCao tipo, StatusCao status);
 }

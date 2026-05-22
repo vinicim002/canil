@@ -1,4 +1,5 @@
 import { CLIENTE_MENSAGENS } from "../../../../constants/cliente";
+import { WHATSAPP_CANIL_NUMERO } from "../../../../constants/whatsapp";
 
 export function ClienteSecaoComunicacao() {
   return (
@@ -7,7 +8,7 @@ export function ClienteSecaoComunicacao() {
 
       <div className="grid grid-cols-2 gap-5">
         <a
-          href="https://wa.me/5500000000000"
+          href={`https://wa.me/${WHATSAPP_CANIL_NUMERO}`}
           target="_blank"
           rel="noreferrer"
           className="bg-green-500 rounded-2xl p-6 flex flex-row items-center gap-4 hover:bg-green-600 transition-colors"

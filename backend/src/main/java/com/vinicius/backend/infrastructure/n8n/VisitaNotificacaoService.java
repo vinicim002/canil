@@ -1,10 +1,12 @@
 package com.vinicius.backend.infrastructure.n8n;
 
 import com.vinicius.backend.config.MailProperties;
+import com.vinicius.backend.config.N8nProperties;
 import com.vinicius.backend.domain.visita.dto.VisitaResponse;
 import com.vinicius.backend.domain.visita.mapper.VisitaMapper;
 import com.vinicius.backend.domain.visita.model.VisitaAgendamento;
 import com.vinicius.backend.infrastructure.email.EmailService;
+import com.vinicius.backend.infrastructure.evolution.EvolutionMessagingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +19,8 @@ import org.springframework.stereotype.Service;
 public class VisitaNotificacaoService {
 
     private final N8nWebhookClient n8nWebhookClient;
+    private final EvolutionMessagingService evolutionMessagingService;
+    private final N8nProperties n8nProperties;
     private final VisitaMapper visitaMapper;
     private final MailProperties mailProperties;
     private final EmailService emailService;
@@ -28,15 +32,24 @@ public class VisitaNotificacaoService {
     public void disparar(TipoEventoVisita evento, VisitaAgendamento visita) {
         VisitaResponse response = visitaMapper.toResponse(visita);
         VisitaNotificacaoPayload payload = montarPayload(evento, response);
-        n8nWebhookClient.enviar(payload);
+        enviarWhatsApp(payload, visitaMapper.montarLinkWhatsApp(visita.getTokenAcesso()));
         enviarEmailSeAplicavel(evento, response);
     }
 
     @Async
     public void disparar(TipoEventoVisita evento, VisitaResponse response) {
         VisitaNotificacaoPayload payload = montarPayload(evento, response);
-        n8nWebhookClient.enviar(payload);
+        enviarWhatsApp(payload, payload.linkGerenciamento());
         enviarEmailSeAplicavel(evento, response);
+    }
+
+    private void enviarWhatsApp(VisitaNotificacaoPayload payload, String linkWhatsApp) {
+        if (n8nProperties.isVisitaWhatsappViaEvolutionDireto()) {
+            String texto = VisitaWhatsAppMensagemBuilder.montarTexto(payload, linkWhatsApp);
+            evolutionMessagingService.enviarTexto(payload.telefoneWhatsApp(), texto, true);
+        } else {
+            n8nWebhookClient.enviar(payload);
+        }
     }
 
     private VisitaNotificacaoPayload montarPayload(TipoEventoVisita evento, VisitaResponse response) {
@@ -71,7 +84,7 @@ public class VisitaNotificacaoService {
         }
     }
 
-    static String formatarTelefoneWhatsApp(String telefone) {
+    public static String formatarTelefoneWhatsApp(String telefone) {
         String digits = telefone.replaceAll("\\D", "");
         if (digits.startsWith("55") && digits.length() >= 12) {
             return digits;

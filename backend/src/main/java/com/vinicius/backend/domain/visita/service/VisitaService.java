@@ -99,6 +99,7 @@ public class VisitaService {
 
         visita.setDataHora(request.dataHora());
         visita.setStatus(StatusAgendamento.REAGENDADO);
+        visita.setLembreteEnviadoEm(null);
         if (request.observacoes() != null) {
             visita.setObservacoes(request.observacoes().trim().isEmpty() ? null : request.observacoes().trim());
         }

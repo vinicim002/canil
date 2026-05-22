@@ -1,0 +1,54 @@
+{
+  "name": "Canil — Lembretes de visita (cron)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "schedule-1h",
+      "name": "A cada 1 hora",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:8080/api/webhooks/n8n/visitas/lembretes/processar?horas=24",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Webhook-Secret",
+              "value": "canil-n8n-dev-secret"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "http-processar",
+      "name": "Spring processar lembretes",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [280, 300]
+    }
+  ],
+  "connections": {
+    "A cada 1 hora": {
+      "main": [[{ "node": "Spring processar lembretes", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instructions": "Ative este workflow. A cada hora o Spring envia lembretes para visitas em ~24h (janela ±1h). Requer Spring na porta 8080 e Evolution conectada. Dedup: coluna lembrete_enviado_em."
+  }
+}

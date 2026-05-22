@@ -58,4 +58,8 @@ public class VisitaAgendamento {
 
     @UpdateTimestamp
     private LocalDateTime atualizadoEm;
+
+    /** Preenchido quando o lembrete WhatsApp (ex.: 24h antes) foi enviado. */
+    @Column(name = "lembrete_enviado_em")
+    private LocalDateTime lembreteEnviadoEm;
 }
