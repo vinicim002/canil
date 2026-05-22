@@ -8,134 +8,61 @@
         "responseMode": "onReceived",
         "options": {}
       },
+      "id": "webhook-spring",
       "name": "Webhook Spring",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [0, 0],
+      "position": [0, 300],
       "webhookId": "canil-visita-eventos"
     },
     {
       "parameters": {
-        "rules": {
-          "values": [
-            {
-              "conditions": {
-                "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.body.evento }}",
-                    "rightValue": "VISITA_CRIADA",
-                    "operator": { "type": "string", "operation": "equals" }
-                  }
-                ],
-                "combinator": "and"
-              },
-              "renameOutput": true,
-              "outputKey": "criada"
-            },
-            {
-              "conditions": {
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.body.evento }}",
-                    "rightValue": "VISITA_REAGENDADA",
-                    "operator": { "type": "string", "operation": "equals" }
-                  }
-                ]
-              },
-              "renameOutput": true,
-              "outputKey": "reagendada"
-            },
-            {
-              "conditions": {
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.body.evento }}",
-                    "rightValue": "VISITA_CANCELADA",
-                    "operator": { "type": "string", "operation": "equals" }
-                  }
-                ]
-              },
-              "renameOutput": true,
-              "outputKey": "cancelada"
-            },
-            {
-              "conditions": {
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.body.evento }}",
-                    "rightValue": "VISITA_CONFIRMADA",
-                    "operator": { "type": "string", "operation": "equals" }
-                  }
-                ]
-              },
-              "renameOutput": true,
-              "outputKey": "confirmada"
-            },
-            {
-              "conditions": {
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.body.evento }}",
-                    "rightValue": "VISITA_LEMBRETE",
-                    "operator": { "type": "string", "operation": "equals" }
-                  }
-                ]
-              },
-              "renameOutput": true,
-              "outputKey": "lembrete"
-            }
-          ]
-        },
-        "options": {}
+        "jsCode": "const e = $input.first().json;\nlet texto = '';\nswitch (e.evento) {\n  case 'VISITA_CRIADA':\n    texto = `Olá, ${e.nome}! 🐶\\n\\nSua visita ao ${e.siteName} foi agendada.\\n\\nGerencie pelo link:\\n${e.linkGerenciamento}`;\n    break;\n  case 'VISITA_REAGENDADA':\n    texto = `Olá, ${e.nome}! Sua visita foi reagendada.\\n\\n${e.linkGerenciamento}`;\n    break;\n  case 'VISITA_CANCELADA':\n    texto = `Olá, ${e.nome}. Sua visita foi cancelada. Para marcar de novo, fale conosco no WhatsApp.`;\n    break;\n  case 'VISITA_CONFIRMADA':\n    texto = `Olá, ${e.nome}! ✅ Visita confirmada.\\n\\n${e.linkGerenciamento}`;\n    break;\n  case 'VISITA_LEMBRETE':\n    texto = `Olá, ${e.nome}! Lembrete: você tem visita agendada em breve.\\n\\n${e.linkGerenciamento}`;\n    break;\n  default:\n    texto = `Olá, ${e.nome}! ${e.linkGerenciamento || ''}`;\n}\nreturn [{ json: { ...e, textoWhatsApp: texto } }];"
       },
-      "name": "Tipo de evento",
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 3,
-      "position": [280, 0]
+      "id": "code-mensagem",
+      "name": "Montar mensagem",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [280, 300]
     },
     {
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.EVOLUTION_API_URL }}/message/sendText/{{ $env.EVOLUTION_INSTANCE }}",
+        "url": "http://evolution-api:8080/message/sendText/canil",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "apikey", "value": "={{ $env.EVOLUTION_API_KEY }}" }
-          ]
-        },
-        "sendBody": true,
-        "bodyParameters": {
-          "parameters": [
-            { "name": "number", "value": "={{ $json.body.telefoneWhatsApp }}" },
             {
-              "name": "text",
-              "value": "={{ 'Olá, ' + $json.body.nome + '! Sua visita ao ' + $json.body.siteName + ' foi agendada. Gerencie pelo link: ' + $json.body.linkGerenciamento }}"
+              "name": "apikey",
+              "value": "canil-evolution-dev-key"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
             }
           ]
         },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ number: $json.telefoneWhatsApp, text: $json.textoWhatsApp }) }}",
         "options": {}
       },
-      "name": "Evolution — WhatsApp",
+      "id": "evolution-send",
+      "name": "Evolution WhatsApp",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [560, 0]
+      "position": [520, 300]
     }
   ],
   "connections": {
-    "Webhook Spring": { "main": [[{ "node": "Tipo de evento", "type": "main", "index": 0 }]] },
-    "Tipo de evento": {
-      "main": [
-        [{ "node": "Evolution — WhatsApp", "type": "main", "index": 0 }],
-        [{ "node": "Evolution — WhatsApp", "type": "main", "index": 0 }],
-        [{ "node": "Evolution — WhatsApp", "type": "main", "index": 0 }],
-        [{ "node": "Evolution — WhatsApp", "type": "main", "index": 0 }],
-        [{ "node": "Evolution — WhatsApp", "type": "main", "index": 0 }]
-      ]
+    "Webhook Spring": {
+      "main": [[{ "node": "Montar mensagem", "type": "main", "index": 0 }]]
+    },
+    "Montar mensagem": {
+      "main": [[{ "node": "Evolution WhatsApp", "type": "main", "index": 0 }]]
     }
   },
-  "meta": {
-    "templateCredsSetupCompleted": false
-  },
-  "settings": { "executionOrder": "v1" }
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "meta": { "templateCredsSetupCompleted": true }
 }
