@@ -79,17 +79,30 @@ public class ReservaController {
 
     @PatchMapping("/{id}/cancelar")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ReservaResponse> cancelar(@PathVariable UUID id) {
-        // Aqui o service já valida se o usuário pode cancelar
-        return ResponseEntity.ok(reservaService.cancelar(id));
+    public ResponseEntity<ReservaResponse> cancelar(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        return ResponseEntity.ok(reservaService.cancelar(
+                id,
+                resolverUsuarioId(userDetails),
+                isAdmin(userDetails)
+        ));
     }
 
     // --- BUSCA E AUXILIARES ---
 
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ReservaResponse> buscarPorId(@PathVariable UUID id) {
-        return ResponseEntity.ok(reservaService.buscarPorId(id));
+    public ResponseEntity<ReservaResponse> buscarPorId(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        return ResponseEntity.ok(reservaService.buscarPorId(
+                id,
+                resolverUsuarioId(userDetails),
+                isAdmin(userDetails)
+        ));
     }
 
     @GetMapping("/status/{status}")
@@ -102,5 +115,10 @@ public class ReservaController {
 
     private UUID resolverUsuarioId(UserDetails userDetails) {
         return usuarioService.buscarEntidadePorEmail(userDetails.getUsername()).getId();
+    }
+
+    private boolean isAdmin(UserDetails userDetails) {
+        return userDetails.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
     }
 }

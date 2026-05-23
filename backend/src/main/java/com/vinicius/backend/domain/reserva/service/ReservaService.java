@@ -14,6 +14,7 @@ import com.vinicius.backend.domain.usuario.service.UsuarioService;
 import com.vinicius.backend.shared.exception.BusinessException;
 import com.vinicius.backend.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -100,8 +101,9 @@ public class ReservaService {
     }
 
     @Transactional
-    public ReservaResponse cancelar(UUID id) {
+    public ReservaResponse cancelar(UUID id, UUID usuarioId, boolean isAdmin) {
         Reserva reserva = buscarEntidadePorId(id);
+        verificarAcesso(reserva, usuarioId, isAdmin);
 
         if (reserva.getStatus() == StatusReserva.PAGA) {
             throw new BusinessException("Reservas pagas não podem ser canceladas por este método.");
@@ -151,7 +153,15 @@ public class ReservaService {
     }
 
     @Transactional(readOnly = true)
-    public ReservaResponse buscarPorId(UUID id) {
-        return reservaMapper.toResponse(buscarEntidadePorId(id));
+    public ReservaResponse buscarPorId(UUID id, UUID usuarioId, boolean isAdmin) {
+        Reserva reserva = buscarEntidadePorId(id);
+        verificarAcesso(reserva, usuarioId, isAdmin);
+        return reservaMapper.toResponse(reserva);
+    }
+
+    private void verificarAcesso(Reserva reserva, UUID usuarioId, boolean isAdmin) {
+        if (!isAdmin && !reserva.getUsuario().getId().equals(usuarioId)) {
+            throw new AccessDeniedException("Acesso negado a esta reserva.");
+        }
     }
 }

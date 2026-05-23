@@ -1,4 +1,5 @@
 import { api } from "./api";
+import { publicApi } from "./publicApi";
 import type { StatusUsuario, UsuarioResponse } from "../types/usuario";
 
 export interface LoginRequest {
@@ -34,6 +35,15 @@ export const authService = {
     api.post<LoginResponse>("/auth/refresh", { refreshToken }),
 
   me: () => api.get<UsuarioResponse>("/auth/me"),
+
+  forgotPassword: (email: string) =>
+    publicApi.post<{ mensagem: string }>("/auth/forgot-password", { email }),
+
+  resetPassword: (token: string, novaSenha: string) =>
+    publicApi.post<{ mensagem: string }>("/auth/reset-password", {
+      token,
+      novaSenha,
+    }),
 
   logout: () => {
     localStorage.clear();

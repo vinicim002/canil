@@ -7,30 +7,11 @@ import {
 import type { StatusUsuario } from "../types/usuario";
 import { AuthContext } from "./AuthContext";
 
-function resolveStatus(stored: string | null): StatusUsuario {
-  if (stored === "APROVADO" || stored === "PENDENTE" || stored === "REJEITADO") {
-    return stored;
-  }
-  return "APROVADO";
-}
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [usuario, setUsuario] = useState<LoginResponse | null>(() => {
-    const token = localStorage.getItem("accessToken");
-    if (!token) return null;
+  const hasStoredToken = !!localStorage.getItem("accessToken");
 
-    return {
-      accessToken: token,
-      refreshToken: localStorage.getItem("refreshToken") || "",
-      usuarioId: localStorage.getItem("usuarioId") || "",
-      nome: localStorage.getItem("nome") || "",
-      email: localStorage.getItem("email") || "",
-      role: (localStorage.getItem("role") as "ADMIN" | "CLIENTE") || "CLIENTE",
-      status: resolveStatus(localStorage.getItem("status")),
-    };
-  });
-
-  const [loading] = useState(false);
+  const [usuario, setUsuario] = useState<LoginResponse | null>(null);
+  const [loading, setLoading] = useState(hasStoredToken);
 
   function persistSession(response: LoginResponse) {
     localStorage.setItem("accessToken", response.accessToken);
@@ -49,6 +30,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
+    if (!hasStoredToken) return;
+
+    let cancelled = false;
+
+    authService
+      .me()
+      .then((me) => {
+        if (cancelled) return;
+        persistSession({
+          accessToken: localStorage.getItem("accessToken") || "",
+          refreshToken: localStorage.getItem("refreshToken") || "",
+          usuarioId: me.id,
+          nome: me.nome,
+          email: me.email,
+          role: me.role,
+          status: me.status,
+        });
+      })
+      .catch(() => {
+        if (!cancelled) {
+          localStorage.clear();
+          setUsuario(null);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [hasStoredToken]);
+
+  useEffect(() => {
     if (!usuario) return;
 
     const refreshInterval = setInterval(async () => {
@@ -59,7 +74,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const response = await authService.refresh(refreshToken);
         persistSession(response);
       } catch {
-        logout();
+        localStorage.clear();
+        setUsuario(null);
+        window.location.href = "/login";
       }
     }, 10 * 60 * 1000);
 
@@ -69,6 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function login(data: LoginRequest): Promise<LoginResponse> {
     const response = await authService.login(data);
     persistSession(response);
+    setLoading(false);
     return response;
   }
 

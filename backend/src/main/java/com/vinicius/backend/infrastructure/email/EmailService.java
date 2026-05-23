@@ -26,16 +26,19 @@ public class EmailService {
     private final Optional<JavaMailSender> mailSender;
     private final MailProperties mailProperties;
     private final EmailTemplateRenderer templateRenderer;
+    private final ResendEmailClient resendEmailClient;
 
     @Autowired
     public EmailService(
             Optional<JavaMailSender> mailSender,
             MailProperties mailProperties,
-            EmailTemplateRenderer templateRenderer
+            EmailTemplateRenderer templateRenderer,
+            ResendEmailClient resendEmailClient
     ) {
         this.mailSender = mailSender;
         this.mailProperties = mailProperties;
         this.templateRenderer = templateRenderer;
+        this.resendEmailClient = resendEmailClient;
     }
 
     public void enviarAprovacaoCliente(String nome, String emailDestino) {
@@ -79,6 +82,16 @@ public class EmailService {
         enviarSilencioso(visita.email(), "Visita cancelada — " + mailProperties.getSiteName(), html);
     }
 
+    public void enviarRecuperacaoSenha(String nome, String emailDestino, String linkRedefinicao) {
+        String html = templateRenderer.renderRecuperacaoSenha(
+                nome,
+                linkRedefinicao,
+                mailProperties.getSiteName(),
+                mailProperties.getSiteUrl()
+        );
+        enviarSilencioso(emailDestino, "Recuperação de senha — " + mailProperties.getSiteName(), html);
+    }
+
     public void enviarContato(ContatoRequest request) {
         Map<String, String> dados = Map.of(
                 "nome", request.nome(),
@@ -103,9 +116,18 @@ public class EmailService {
 
     /** @return true se enviou ou estava desabilitado; false se falhou */
     private boolean enviarSilencioso(String para, String assunto, String html) {
-        if (!mailProperties.isEnabled() || mailSender.isEmpty()) {
-            log.info("[Email desabilitado] Para: {} | Assunto: {}", para, assunto);
+        if (!mailProperties.isEnabled()) {
+            log.info("[Email desabilitado] Assunto: {}", assunto);
             return true;
+        }
+
+        if (mailProperties.isResend()) {
+            return resendEmailClient.enviar(para, assunto, html);
+        }
+
+        if (mailSender.isEmpty()) {
+            log.warn("[Email SMTP] JavaMailSender não configurado");
+            return false;
         }
 
         try {
@@ -116,10 +138,10 @@ public class EmailService {
             helper.setSubject(assunto);
             helper.setText(html, true);
             mailSender.get().send(message);
-            log.info("E-mail enviado para {}", para);
+            log.info("[SMTP] E-mail enviado");
             return true;
         } catch (MessagingException e) {
-            log.error("Falha ao enviar e-mail para {}: {}", para, e.getMessage());
+            log.error("[SMTP] Falha ao enviar e-mail: {}", e.getMessage());
             return false;
         }
     }

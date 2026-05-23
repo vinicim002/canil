@@ -12,6 +12,7 @@ import com.vinicius.backend.domain.usuario.service.UsuarioService;
 import com.vinicius.backend.shared.exception.BusinessException;
 import com.vinicius.backend.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -78,8 +79,10 @@ public class AgendamentoService {
     }
 
     @Transactional(readOnly = true)
-    public AgendamentoResponse buscarPorId(UUID id) {
-        return agendamentoMapper.toResponse(buscarEntidadePorId(id));
+    public AgendamentoResponse buscarPorId(UUID id, UUID usuarioId, boolean isAdmin) {
+        Agendamento agendamento = buscarEntidadePorId(id);
+        verificarAcesso(agendamento, usuarioId, isAdmin);
+        return agendamentoMapper.toResponse(agendamento);
     }
 
     @Transactional
@@ -93,8 +96,10 @@ public class AgendamentoService {
     }
 
     @Transactional
-    public AgendamentoResponse cancelar(UUID id) {
+    public AgendamentoResponse cancelar(UUID id, UUID usuarioId, boolean isAdmin) {
         Agendamento agendamento = buscarEntidadePorId(id);
+        verificarAcesso(agendamento, usuarioId, isAdmin);
+
         if (agendamento.getStatus() == StatusAgendamento.REALIZADO) {
             throw new BusinessException("Agendamentos realizados não podem ser cancelados.");
         }
@@ -115,5 +120,11 @@ public class AgendamentoService {
     public Agendamento buscarEntidadePorId(UUID id) {
         return agendamentoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Agendamento não encontrado."));
+    }
+
+    private void verificarAcesso(Agendamento agendamento, UUID usuarioId, boolean isAdmin) {
+        if (!isAdmin && !agendamento.getUsuario().getId().equals(usuarioId)) {
+            throw new AccessDeniedException("Acesso negado a este agendamento.");
+        }
     }
 }

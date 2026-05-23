@@ -1,7 +1,9 @@
 import type { FaqResponse } from "./faqResponse"; // Certifique-se de ajustar os caminhos dos tipos
 import type { FaqRequest } from "./faqRequest";
 
-const BASE_URL = "http://localhost:8080/api"; // Ajuste para a sua URL base do backend
+import { API_BASE_URL } from "../../config/api";
+
+const BASE_URL = API_BASE_URL;
 
 async function handleRequest<T>(
   url: string,

@@ -1,13 +1,16 @@
 package com.vinicius.backend.config;
 
 import com.vinicius.backend.security.JwtAuthFilter;
+import com.vinicius.backend.security.RateLimitFilter;
 import com.vinicius.backend.security.RestAccessDeniedHandler;
 import com.vinicius.backend.security.RestAuthenticationEntryPoint;
+import com.vinicius.backend.security.SecurityHeadersConfigurer;
 import com.vinicius.backend.security.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -36,9 +39,11 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
+    private final RateLimitFilter rateLimitFilter;
     private final UserDetailsServiceImpl userDetailsService;
     private final RestAuthenticationEntryPoint authenticationEntryPoint;
     private final RestAccessDeniedHandler accessDeniedHandler;
+    private final Environment environment;
 
     @Value("${app.cors.allowed-origins}")
     private String allowedOrigins;
@@ -51,6 +56,7 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
+                .headers(headers -> SecurityHeadersConfigurer.apply(headers, environment))
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
@@ -59,7 +65,12 @@ public class SecurityConfig {
                         .accessDeniedHandler(accessDeniedHandler)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(new AntPathRequestMatcher("/api/auth/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/auth/login")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/auth/refresh")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/auth/register")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/auth/forgot-password")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/auth/reset-password")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/auth/me")).authenticated()
                         .requestMatchers(new AntPathRequestMatcher("/api/contato", "POST")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/health")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/info")).permitAll()
@@ -87,6 +98,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
+                .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

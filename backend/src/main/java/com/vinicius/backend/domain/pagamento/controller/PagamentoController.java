@@ -9,7 +9,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import com.vinicius.backend.domain.usuario.service.UsuarioService;
 
 import java.util.List;
 import java.util.UUID;
@@ -20,6 +23,7 @@ import java.util.UUID;
 public class PagamentoController {
 
     private final PagamentoService pagamentoService;
+    private final UsuarioService usuarioService;
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -33,9 +37,13 @@ public class PagamentoController {
     @GetMapping("/reserva/{reservaId}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<PagamentoResponse>> listarPorReserva(
-            @PathVariable UUID reservaId
+            @PathVariable UUID reservaId,
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
-        return ResponseEntity.ok(pagamentoService.listarPorReserva(reservaId));
+        UUID usuarioId = usuarioService.buscarEntidadePorEmail(userDetails.getUsername()).getId();
+        boolean isAdmin = userDetails.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+        return ResponseEntity.ok(pagamentoService.listarPorReserva(reservaId, usuarioId, isAdmin));
     }
 
     @GetMapping("/status/{status}")

@@ -66,18 +66,14 @@ export function LoginPage() {
 
   // Handle Forgot Password
   async function handleForgotPassword(email: string) {
-    // O parâmetro chega aqui
     setErro("");
     setCarregando(true);
 
     try {
-      // Para o ESLint parar de reclamar, podemos logar o email
-      // ou apenas aceitar que ele será usado no futuro.
-      console.log("Recuperação para:", email);
-
-      setSucesso(
-        "Se este email estiver cadastrado, você receberá as instruções em breve.",
-      );
+      const res = await authService.forgotPassword(email);
+      setSucesso(res.mensagem);
+    } catch {
+      setErro("Não foi possível enviar o e-mail. Tente novamente.");
     } finally {
       setCarregando(false);
     }

@@ -176,7 +176,7 @@ curl -s "http://localhost:8080/api/public/visitas/$TOKEN" | jq .
 # Outro horário no mesmo dia (deve estar em /slots)
 DATA_HORA_NOVA="${DATA}T11:00:00"
 
-curl -s -X PATCH "http://localhost:8080/api/public/visitas/$TOKEN/reagendar" \
+curl -s -X PATCH "http://localhost:8080/api/public/visitas/$aSJeOupic_F5RT0fpMkVsCrgPAoXLE7XEwZm3zEBaOQ/reagendar" \
   -H "Content-Type: application/json" \
   -d "{\"dataHora\": \"$DATA_HORA_NOVA\", \"observacoes\": \"Reagendado no teste\"}" | jq .
 ```

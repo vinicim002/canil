@@ -152,4 +152,21 @@ public class EmailTemplateRenderer {
                 """.formatted(BRAND_BROWN, nome, dataHoraFormatada);
         return render("Visita cancelada", conteudo, siteName, siteUrl);
     }
+
+    public String renderRecuperacaoSenha(String nome, String linkRedefinicao, String siteName, String siteUrl) {
+        String conteudo = """
+                <h2 style="margin:0 0 16px;color:%s;font-size:22px;">Recuperação de senha</h2>
+                <p style="margin:0 0 16px;">Olá, <strong>%s</strong>.</p>
+                <p style="margin:0 0 24px;">Recebemos uma solicitação para redefinir sua senha. O link abaixo é válido por <strong>1 hora</strong>.</p>
+                <table role="presentation" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td style="border-radius:999px;background:%s;">
+                      <a href="%s" style="display:inline-block;padding:14px 32px;color:#ffffff;font-weight:700;text-decoration:none;font-size:14px;">REDEFINIR SENHA</a>
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin:24px 0 0;font-size:13px;color:#888;">Se você não solicitou isso, ignore este e-mail.</p>
+                """.formatted(BRAND_BROWN, nome, BRAND_BROWN, linkRedefinicao);
+        return render("Recuperação de senha", conteudo, siteName, siteUrl);
+    }
 }

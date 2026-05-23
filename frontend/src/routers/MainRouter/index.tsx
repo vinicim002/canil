@@ -8,6 +8,7 @@ import { AgendarVisitaPage } from "../../pages/AgendarVisitaPage";
 import { AgendamentoGestaoPage } from "../../pages/AgendamentoGestaoPage";
 import { FilhotesPage } from "../../pages/FilhotesPage";
 import { LoginPage } from "../../pages/LoginPage";
+import { RedefinirSenhaPage } from "../../pages/RedefinirSenhaPage";
 import { ClienteRoute } from "../../components/ClienteRoute";
 import { ProtectedRoute } from "../../components/ProtectedRoute";
 import { ClientePage } from "../../pages/ClientePage";
@@ -27,6 +28,7 @@ export function MainRouter() {
         <Route path="/agendar-visita" element={<AgendarVisitaPage />} />
         <Route path="/agendamento/:token" element={<AgendamentoGestaoPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/redefinir-senha" element={<RedefinirSenhaPage />} />
 
         <Route
           path="/cliente"

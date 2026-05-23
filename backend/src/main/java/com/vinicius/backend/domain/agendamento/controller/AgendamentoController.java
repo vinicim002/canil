@@ -61,8 +61,12 @@ public class AgendamentoController {
 
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<AgendamentoResponse> buscarPorId(@PathVariable UUID id) {
-        return ResponseEntity.ok(agendamentoService.buscarPorId(id));
+    public ResponseEntity<AgendamentoResponse> buscarPorId(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        UUID usuarioId = usuarioService.buscarEntidadePorEmail(userDetails.getUsername()).getId();
+        return ResponseEntity.ok(agendamentoService.buscarPorId(id, usuarioId, isAdmin(userDetails)));
     }
 
     @PatchMapping("/{id}/confirmar")
@@ -73,13 +77,22 @@ public class AgendamentoController {
 
     @PatchMapping("/{id}/cancelar")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<AgendamentoResponse> cancelar(@PathVariable UUID id) {
-        return ResponseEntity.ok(agendamentoService.cancelar(id));
+    public ResponseEntity<AgendamentoResponse> cancelar(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        UUID usuarioId = usuarioService.buscarEntidadePorEmail(userDetails.getUsername()).getId();
+        return ResponseEntity.ok(agendamentoService.cancelar(id, usuarioId, isAdmin(userDetails)));
     }
 
     @PatchMapping("/{id}/realizado")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AgendamentoResponse> marcarComoRealizado(@PathVariable UUID id) {
         return ResponseEntity.ok(agendamentoService.marcarComoRealizado(id));
+    }
+
+    private boolean isAdmin(UserDetails userDetails) {
+        return userDetails.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
     }
 }

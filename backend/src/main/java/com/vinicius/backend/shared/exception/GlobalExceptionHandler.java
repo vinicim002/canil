@@ -8,6 +8,8 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
+import com.vinicius.backend.shared.exception.BusinessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -27,6 +29,22 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<Map<String, Object>> handleBusiness(BusinessException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleDataIntegrity(DataIntegrityViolationException ex) {
+        String detalhe = ex.getMostSpecificCause() != null
+                ? ex.getMostSpecificCause().getMessage()
+                : ex.getMessage();
+
+        if (detalhe != null && detalhe.contains("idx_visita_slot_ativo")) {
+            return buildResponse(HttpStatus.CONFLICT, "Este horário acabou de ser reservado. Escolha outro.");
+        }
+        if (detalhe != null && detalhe.contains("idx_reserva_cao_ativa")) {
+            return buildResponse(HttpStatus.CONFLICT, "Este filhote acabou de ser reservado. Escolha outro horário ou filhote.");
+        }
+
+        return buildResponse(HttpStatus.CONFLICT, "Conflito de dados. Tente novamente.");
     }
 
     @ExceptionHandler({BadCredentialsException.class})

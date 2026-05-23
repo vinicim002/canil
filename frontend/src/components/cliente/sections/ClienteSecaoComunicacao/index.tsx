@@ -1,7 +1,11 @@
-import { CLIENTE_MENSAGENS } from "../../../../constants/cliente";
 import { WHATSAPP_CANIL_NUMERO } from "../../../../constants/whatsapp";
+import type { ClientePortalData } from "../../ClienteSectionContent";
 
-export function ClienteSecaoComunicacao() {
+interface Props {
+  portal: ClientePortalData;
+}
+
+export function ClienteSecaoComunicacao({ portal: _portal }: Props) {
   return (
     <div className="flex flex-col gap-6">
       <h2 className="font-cmas-play text-brown text-2xl">Comunicação</h2>
@@ -40,24 +44,10 @@ export function ClienteSecaoComunicacao() {
         </a>
       </div>
 
-      <div className="bg-white rounded-2xl border border-brown/10 overflow-hidden">
-        <div className="px-6 py-4 border-b border-brown/10">
-          <h3 className="font-cmas-play text-brown text-xl">Mensagens</h3>
-        </div>
-        <div className="flex flex-col gap-4 p-6">
-          {CLIENTE_MENSAGENS.map((msg, i) => (
-            <div key={i} className="flex flex-col gap-1">
-              <div className="flex flex-row items-center justify-between">
-                <span className="text-orange font-semibold text-xs">{msg.de}</span>
-                <span className="text-body/40 text-xs">{msg.data}</span>
-              </div>
-              <div className="bg-cream rounded-xl px-4 py-3">
-                <p className="text-body font-medium text-sm">{msg.mensagem}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      <p className="text-body/60 text-sm bg-cream rounded-xl p-4 border border-brown/10">
+        Mensagens automáticas do canil aparecerão aqui em uma próxima versão.
+        Por enquanto, use WhatsApp ou e-mail para falar conosco.
+      </p>
     </div>
   );
 }

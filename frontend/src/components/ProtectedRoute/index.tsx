@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import { AuthLoading } from "../AuthLoading";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -9,7 +10,7 @@ interface ProtectedRouteProps {
 export function ProtectedRoute({ children, adminOnly = false }: ProtectedRouteProps) {
   const { isAuthenticated, isAdmin, loading } = useAuth();
 
-  if (loading) return null;
+  if (loading) return <AuthLoading />;
 
   if (!isAuthenticated) return <Navigate to="/login" replace />;
 

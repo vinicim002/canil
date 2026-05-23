@@ -1,4 +1,6 @@
-const BASE_URL = "http://localhost:8080/api";
+import { API_BASE_URL } from "../config/api";
+
+const BASE_URL = API_BASE_URL;
 
 function getToken(): string | null {
   return localStorage.getItem("accessToken");
@@ -23,6 +25,11 @@ async function refreshAccessToken(): Promise<string | null> {
   const data = await response.json();
   localStorage.setItem("accessToken", data.accessToken);
   localStorage.setItem("refreshToken", data.refreshToken);
+  if (data.usuarioId) localStorage.setItem("usuarioId", data.usuarioId);
+  if (data.nome) localStorage.setItem("nome", data.nome);
+  if (data.email) localStorage.setItem("email", data.email);
+  if (data.role) localStorage.setItem("role", data.role);
+  if (data.status) localStorage.setItem("status", data.status);
   return data.accessToken;
 }
 

@@ -107,6 +107,19 @@ services:
       - net.ipv6.conf.default.disable_ipv6=1
     restart: unless-stopped
 
+  n8n-postgres:
+    image: postgres:16
+    container_name: canil_n8n_postgres
+    environment:
+      POSTGRES_DB: n8n_db
+      POSTGRES_USER: n8n_user
+      POSTGRES_PASSWORD: n8n_pass
+    volumes:
+      - n8n_postgres_data:/var/lib/postgresql/data
+    networks:
+      - canil_net
+    restart: unless-stopped
+
   n8n:
     image: n8nio/n8n:latest
     container_name: canil_n8n
@@ -116,11 +129,11 @@ services:
       GENERIC_TIMEZONE: America/Sao_Paulo
       TZ: America/Sao_Paulo
       DB_TYPE: postgresdb
-      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_HOST: n8n-postgres
       DB_POSTGRESDB_PORT: "5432"
-      DB_POSTGRESDB_DATABASE: canil_db
-      DB_POSTGRESDB_USER: canil_user
-      DB_POSTGRESDB_PASSWORD: canil_pass
+      DB_POSTGRESDB_DATABASE: n8n_db
+      DB_POSTGRESDB_USER: n8n_user
+      DB_POSTGRESDB_PASSWORD: n8n_pass
       N8N_ENCRYPTION_KEY: canil_secret_key_123
       N8N_HOST: localhost
       N8N_PORT: "5678"
@@ -131,7 +144,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
-      - postgres
+      - n8n-postgres
       - evolution-api
     networks:
       - canil_net
@@ -146,4 +159,5 @@ volumes:
   canil_redis_data:
   evolution_postgres_data:
   evolution_instances:
+  n8n_postgres_data:
   n8n_data:

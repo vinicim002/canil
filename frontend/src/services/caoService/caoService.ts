@@ -1,7 +1,9 @@
 import type { CaoRequest } from "./caoRequest";
 import type { CaoResponse } from "./caoResponse";
 
-const BASE_URL = "http://localhost:8080/api";
+import { API_BASE_URL } from "../../config/api";
+
+const BASE_URL = API_BASE_URL;
 
 export type TipoCao = "FILHOTE" | "MATRIZ" | "REPRODUTOR";
 

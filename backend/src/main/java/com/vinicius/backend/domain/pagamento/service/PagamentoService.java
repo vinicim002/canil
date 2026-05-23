@@ -13,6 +13,7 @@ import com.vinicius.backend.domain.reserva.service.ReservaService;
 import com.vinicius.backend.shared.exception.BusinessException;
 import com.vinicius.backend.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -103,7 +104,11 @@ public class PagamentoService {
     }
 
     @Transactional(readOnly = true)
-    public List<PagamentoResponse> listarPorReserva(UUID reservaId) {
+    public List<PagamentoResponse> listarPorReserva(UUID reservaId, UUID usuarioId, boolean isAdmin) {
+        Reserva reserva = reservaService.buscarEntidadePorId(reservaId);
+        if (!isAdmin && !reserva.getUsuario().getId().equals(usuarioId)) {
+            throw new AccessDeniedException("Acesso negado aos pagamentos desta reserva.");
+        }
         return pagamentoRepository.findByReservaId(reservaId)
                 .stream()
                 .map(pagamentoMapper::toResponse)
