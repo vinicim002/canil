@@ -21,13 +21,13 @@ public class RailwayDatabaseEnvironmentPostProcessor implements EnvironmentPostP
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
-        if (hasText(environment.getProperty("spring.datasource.url"))) {
-            return;
-        }
-
         Map<String, Object> props = new HashMap<>();
 
         String dbUrl = resolveDbUrl(environment, props);
+        if (!hasText(dbUrl)) {
+            dbUrl = normalizeConfiguredUrl(environment.getProperty("spring.datasource.url"), props);
+        }
+
         if (!hasText(dbUrl)) {
             return;
         }
@@ -38,6 +38,17 @@ public class RailwayDatabaseEnvironmentPostProcessor implements EnvironmentPostP
         props.putIfAbsent("spring.datasource.password", resolvePassword(environment, props));
 
         environment.getPropertySources().addFirst(new MapPropertySource(SOURCE, props));
+    }
+
+    private static String normalizeConfiguredUrl(String configuredUrl, Map<String, Object> props) {
+        if (!hasText(configuredUrl) || configuredUrl.startsWith("jdbc:")) {
+            return configuredUrl != null && configuredUrl.startsWith("jdbc:") ? ensureSsl(configuredUrl) : null;
+        }
+        if (configuredUrl.startsWith("postgresql://") || configuredUrl.startsWith("postgres://")) {
+            parseCredentials(configuredUrl, props);
+            return ensureSsl(normalizeJdbcUrl(configuredUrl));
+        }
+        return null;
     }
 
     static String resolveDbUrl(ConfigurableEnvironment environment, Map<String, Object> props) {

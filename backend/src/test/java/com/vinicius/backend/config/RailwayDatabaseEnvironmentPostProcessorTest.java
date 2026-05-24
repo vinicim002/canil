@@ -1,6 +1,7 @@
 package com.vinicius.backend.config;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.SpringApplication;
 import org.springframework.mock.env.MockEnvironment;
 
 import java.util.HashMap;
@@ -45,5 +46,21 @@ class RailwayDatabaseEnvironmentPostProcessorTest {
         String url = RailwayDatabaseEnvironmentPostProcessor.resolveDbUrl(env, props);
 
         assertThat(url).isEqualTo("jdbc:postgresql://localhost:5432/canil_db");
+    }
+
+    @Test
+    void normalizaSpringDatasourceUrlPostgresqlSemJdbcPrefix() {
+        MockEnvironment env = new MockEnvironment();
+        env.setProperty(
+                "spring.datasource.url",
+                "postgresql://postgres:secret@postgres.railway.internal:5432/railway"
+        );
+
+        new RailwayDatabaseEnvironmentPostProcessor().postProcessEnvironment(env, new SpringApplication());
+
+        assertThat(env.getProperty("spring.datasource.url"))
+                .isEqualTo("jdbc:postgresql://postgres:secret@postgres.railway.internal:5432/railway");
+        assertThat(env.getProperty("spring.datasource.username")).isEqualTo("postgres");
+        assertThat(env.getProperty("spring.datasource.password")).isEqualTo("secret");
     }
 }
