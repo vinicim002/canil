@@ -1,6 +1,2 @@
-# Template commitado — configure as variáveis no Railway (ver backend/.env.example).
-# O arquivo application-prod.properties local é gitignored.
-
-spring.profiles.active=prod
-
-# Ver backend/.env.example para a lista completa de variáveis de ambiente.
+# application-prod.properties é commitado no repositório (sem segredos).
+# Configure as variáveis no Railway — ver backend/.env.example e docs/DEPLOY.md.
