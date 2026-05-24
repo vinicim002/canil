@@ -35,7 +35,5 @@ build/
 ### Revisao ###
 revisao.txt
 
-### application.properties ###
-src/main/resources/application.properties
+### application.properties (dev local — prod é commitado) ###
 src/main/resources/application-dev.properties
-src/main/resources/application-prod.properties

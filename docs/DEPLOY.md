@@ -48,24 +48,32 @@ Deploy **backend antes do front** se mudar contratos de API. Só mudou UI? Front
 
 O arquivo `backend/railway.toml` já define health check e Dockerfile.
 
+O `application-prod.properties` **fica no repositório** (só placeholders `${VAR}` — sem segredos). O Railway precisa de **commit + redeploy** para incluí-lo no JAR.
+
 ### Variáveis obrigatórias
 
-Use `backend/.env.example` como referência. Mínimo:
+Use `backend/.env.example` como referência. Mínimo para subir:
 
 ```env
 SPRING_PROFILES_ACTIVE=prod
 
-DB_URL=jdbc:postgresql://...
-DB_USERNAME=...
-DB_PASSWORD=...
-
-JWT_SECRET=          # openssl rand -base64 32
-JWT_EXPIRATION=28800000
-JWT_REFRESH_EXPIRATION=604800000
-
+JWT_SECRET=          # openssl rand -base64 32 — SEM ISSO A APP NÃO SOBE
 CORS_ALLOWED_ORIGINS=https://seu-app.vercel.app
+```
 
-MAIL_ENABLED=true
+**Banco:** no serviço backend, use **Variables → Add Reference** e linke o Postgres (`DATABASE_URL`, `PGUSER`, `PGPASSWORD`). O app converte `DATABASE_URL` automaticamente.
+
+Integrações opcionais no início:
+
+```env
+MAIL_ENABLED=false
+N8N_ENABLED=false
+EVOLUTION_ENABLED=false
+```
+
+Variáveis completas (Resend, Cloudinary, n8n, Evolution):
+
+```env
 MAIL_PROVIDER=resend
 RESEND_API_KEY=re_...
 MAIL_FROM=Canil <noreply@seudominio.com>

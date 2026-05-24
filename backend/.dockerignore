@@ -4,4 +4,3 @@ target/
 *.iml
 .env
 application-dev.properties
-application-prod.properties
