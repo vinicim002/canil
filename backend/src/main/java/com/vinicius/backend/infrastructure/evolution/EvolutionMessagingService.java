@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
@@ -48,7 +49,11 @@ public class EvolutionMessagingService {
             return;
         }
         String instance = evolutionProperties.getInstanceName();
+        if (!instanciaProntaParaEnviar(base, instance)) {
+            return;
+        }
 
+        String uri = base + "/message/sendText/" + instance;
         try {
             var body = new java.util.LinkedHashMap<String, Object>();
             body.put("number", telefoneWhatsApp);
@@ -57,9 +62,11 @@ public class EvolutionMessagingService {
                 body.put("linkPreview", true);
             }
 
+            log.info("[Evolution] Enviando texto para {} (timeout leitura {}ms)", telefoneWhatsApp,
+                    evolutionProperties.getReadTimeoutMs());
             restClient()
                     .post()
-                    .uri(base + "/message/sendText/" + instance)
+                    .uri(uri)
                     .header("apikey", evolutionProperties.getApiKey())
                     .body(body)
                     .retrieve()
@@ -69,7 +76,10 @@ public class EvolutionMessagingService {
         } catch (IllegalArgumentException e) {
             log.error("[Evolution] URL inválida (EVOLUTION_BASE_URL): {}", evolutionProperties.getBaseUrl());
         } catch (RestClientException e) {
-            log.error("[Evolution] Falha ao enviar para {}: {}", telefoneWhatsApp, e.getMessage());
+            log.error(
+                    "[Evolution] Falha ao enviar para {} em {}: {} — confira instância {} (connectionState=open) e ./scripts/evolution-conectar-whatsapp.sh",
+                    telefoneWhatsApp, uri, e.getMessage(), instance
+            );
         }
     }
 
@@ -89,6 +99,9 @@ public class EvolutionMessagingService {
             return;
         }
         String instance = evolutionProperties.getInstanceName();
+        if (!instanciaProntaParaEnviar(base, instance)) {
+            return;
+        }
 
         try {
             RestClient client = restClient();
@@ -114,6 +127,48 @@ public class EvolutionMessagingService {
             log.error("[Evolution] URL inválida (EVOLUTION_BASE_URL): {}", evolutionProperties.getBaseUrl());
         } catch (RestClientException e) {
             log.error("[Evolution] Falha ao enviar filhote para {}: {}", resposta.telefoneWhatsApp(), e.getMessage());
+        }
+    }
+
+    private boolean instanciaProntaParaEnviar(String base, String instance) {
+        String state = obterEstadoConexao(base, instance);
+        if ("open".equalsIgnoreCase(state)) {
+            return true;
+        }
+        if ("unknown".equals(state)) {
+            log.warn("[Evolution] connectionState indisponível — tentando enviar mesmo assim (instância {})", instance);
+            return true;
+        }
+        log.error(
+                "[Evolution] WhatsApp não conectado (state={}). Pareie a instância {}: ./scripts/evolution-conectar-whatsapp.sh",
+                state, instance
+        );
+        return false;
+    }
+
+    private String obterEstadoConexao(String base, String instance) {
+        try {
+            Map<String, Object> json = restClient()
+                    .get()
+                    .uri(base + "/instance/connectionState/" + instance)
+                    .header("apikey", evolutionProperties.getApiKey())
+                    .retrieve()
+                    .body(new ParameterizedTypeReference<Map<String, Object>>() {});
+            if (json == null) {
+                return "unknown";
+            }
+            Object instanceObj = json.get("instance");
+            if (instanceObj instanceof Map<?, ?> inst) {
+                Object state = inst.get("state");
+                if (state != null) {
+                    return state.toString();
+                }
+            }
+            Object state = json.get("state");
+            return state != null ? state.toString() : "unknown";
+        } catch (RestClientException e) {
+            log.warn("[Evolution] Erro ao consultar connectionState/{}: {}", instance, e.getMessage());
+            return "unknown";
         }
     }
 

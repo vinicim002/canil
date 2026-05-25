@@ -197,6 +197,8 @@ Body (já no JSON): `{ "number": "...", "text": "..." }`
 | Sintoma | Solução |
 |---------|---------|
 | `URI is not absolute` nos logs | `EVOLUTION_BASE_URL` vazia ou sem `https://`. Use URL completa: `https://evolution-api-production-6e8f.up.railway.app` (sem barra no final). Variável vazia no Railway sobrescreve o default — apague a linha ou preencha corretamente |
+| `Read timed out` (~15s ou 60s) | Evolution demorou demais no `sendText` — quase sempre **WhatsApp desconectado** (`state` ≠ `open`). Rode `connectionState` e pareamento (seção 3). Opcional: `EVOLUTION_READ_TIMEOUT_MS=90000` |
+| `WhatsApp não conectado (state=...)` | Pareie com `./scripts/evolution-conectar-whatsapp.sh 5521XXXXXXXXX` até `state=open` |
 | `Connection refused` / timeout do backend | `EVOLUTION_BASE_URL` errada ou Evolution offline |
 | QR não conecta | Use pareamento por código; volume `/evolution/instances` montado |
 | Evolution reinicia e perde Zap | Falta volume persistente |

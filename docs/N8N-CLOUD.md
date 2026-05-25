@@ -130,6 +130,82 @@ N8N_WEBHOOK_URL=https://vinicim003.app.n8n.cloud/webhook/canil-whatsapp-mensagen
 2. Execute manualmente o nó HTTP ou aguarde o cron
 3. Logs Railway: processamento de lembretes
 
+### WhatsApp recebido (Evolution → n8n → Spring)
+
+Fluxo:
+
+```
+Celular → Evolution (MESSAGES_UPSERT) → n8n webhook → Spring /whatsapp/processar → Evolution (resposta)
+```
+
+1. **Workflow «WhatsApp entrada»** ativo no n8n; nó HTTP com:
+   - URL: `https://canil-production.up.railway.app/api/webhooks/n8n/whatsapp/processar`
+   - Header `X-Webhook-Secret` = `N8N_WEBHOOK_SECRET` do Railway
+2. Configure o webhook na Evolution:
+
+```bash
+export EVOLUTION_API_URL=https://evolution-api-production-6e8f.up.railway.app
+export EVOLUTION_API_KEY=<sua-key>
+export N8N_WEBHOOK_URL=https://vinicim003.app.n8n.cloud/webhook/canil-whatsapp-mensagens
+CONFIGURAR_WEBHOOK=1 ./scripts/test-webhook-whatsapp.sh
+```
+
+3. Teste automático (Spring sem passar pelo Zap):
+
+```bash
+export N8N_WEBHOOK_SECRET=<mesmo-do-railway>
+export TELEFONE_TESTE=5521XXXXXXXXX   # número que tem visita ativa no banco
+export INTENT_TEXTO="alterar agendamento"
+./scripts/test-webhook-whatsapp.sh
+```
+
+4. Teste real: envie **do seu celular** para o WhatsApp do canil uma das frases:
+   - `alterar agendamento` / `reagendar`
+   - `cancelar agendamento`
+   - `reservar filhote`
+
+   | Onde olhar | Esperado |
+   |------------|----------|
+   | n8n Executions | Workflow «WhatsApp entrada» com sucesso |
+   | Railway logs | `[WhatsApp intent] ALTERAR` (ou CANCELAR / RESERVAR_FILHOTE) |
+   | WhatsApp | Resposta automática com link(s) |
+
+> Mensagens **enviadas pelo próprio canil** (`fromMe`) são ignoradas no n8n — teste sempre **recebendo** do cliente.
+
+### Só tenho um celular (o mesmo do WhatsApp do canil)
+
+Isso é comum: o número **pareado na Evolution** é o WhatsApp do negócio. Você **não** consegue “fingir cliente” mandando mensagem desse mesmo aparelho — o WhatsApp trata como enviada por você (`fromMe`) e o workflow **não processa**.
+
+**Opções:**
+
+| Opção | O que testa |
+|--------|-------------|
+| **A) Simular no n8n** | Evolution → n8n → Spring → resposta no Zap do número da visita |
+| **B) curl no Spring** | Só Spring → Evolution (sem n8n) |
+| **C) Outro celular** | Fluxo real ponta a ponta |
+
+**A — Simular mensagem recebida** (telefone = o que está na visita no banco):
+
+```bash
+export N8N_WEBHOOK_URL=https://vinicim003.app.n8n.cloud/webhook/canil-whatsapp-mensagens
+export TELEFONE_REMETENTE=5521XXXXXXXXX
+export TEXTO_MENSAGEM="cancelar agendamento"
+./scripts/simular-mensagem-whatsapp-n8n.sh
+```
+
+**B — Direto no backend** (mais rápido):
+
+```bash
+export N8N_WEBHOOK_SECRET=<railway>
+export TELEFONE_TESTE=5521XXXXXXXXX
+export INTENT_TEXTO="cancelar agendamento"
+./scripts/test-webhook-whatsapp.sh
+```
+
+**C — Visita com número de familiar:** agende no site com o WhatsApp de outra pessoa; essa pessoa manda `cancelar agendamento` para o número do canil.
+
+> Se você agendou visita usando o **número do canil** (5521…), o cancelamento por intent só acha essa visita para **esse** telefone — mas esse número não pode “receber” mensagem de si mesmo no Zap. Agende de novo com outro número ou use A/B com `TELEFONE_REMETENTE` igual ao da visita.
+
 ### Secret inválido
 
 Resposta `401` ou `403` no webhook Spring → confira `N8N_WEBHOOK_SECRET` igual nos dois lados.
