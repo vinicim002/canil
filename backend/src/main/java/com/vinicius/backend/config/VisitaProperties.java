@@ -29,4 +29,7 @@ public class VisitaProperties {
     private String diasPermitidos = "1,2,3,4,5,6";
     /** Horas antes da visita para enviar lembrete WhatsApp (padrão 24h). */
     private int lembreteHorasAntes = 24;
+
+    /** Envia e-mail ao criar/reagendar/cancelar visita (requer app.mail.enabled). */
+    private boolean notificarEmail = true;
 }

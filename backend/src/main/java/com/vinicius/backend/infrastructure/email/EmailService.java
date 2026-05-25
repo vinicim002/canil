@@ -10,6 +10,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -50,7 +51,7 @@ public class EmailService {
         enviar(emailDestino, "Sua conta foi aprovada — " + mailProperties.getSiteName(), html);
     }
 
-    public void enviarConfirmacaoVisita(VisitaResponse visita, TipoEventoVisita evento) {
+    public boolean enviarConfirmacaoVisita(VisitaResponse visita, TipoEventoVisita evento) {
         String titulo = switch (evento) {
             case VISITA_CRIADA -> "Visita agendada";
             case VISITA_REAGENDADA -> "Visita reagendada";
@@ -67,10 +68,10 @@ public class EmailService {
                 mailProperties.getSiteName(),
                 mailProperties.getSiteUrl()
         );
-        enviarSilencioso(visita.email(), titulo + " — " + mailProperties.getSiteName(), html);
+        return enviarSilencioso(visita.email(), titulo + " — " + mailProperties.getSiteName(), html);
     }
 
-    public void enviarCancelamentoVisita(VisitaResponse visita) {
+    public boolean enviarCancelamentoVisita(VisitaResponse visita) {
         String dataFormatada = visita.dataHora()
                 .format(DateTimeFormatter.ofPattern("dd/MM/yyyy 'às' HH:mm", new Locale("pt", "BR")));
         String html = templateRenderer.renderVisitaCancelamento(
@@ -79,7 +80,7 @@ public class EmailService {
                 mailProperties.getSiteName(),
                 mailProperties.getSiteUrl()
         );
-        enviarSilencioso(visita.email(), "Visita cancelada — " + mailProperties.getSiteName(), html);
+        return enviarSilencioso(visita.email(), "Visita cancelada — " + mailProperties.getSiteName(), html);
     }
 
     public void enviarRecuperacaoSenha(String nome, String emailDestino, String linkRedefinicao) {
@@ -117,20 +118,27 @@ public class EmailService {
     /** @return true se enviou ou estava desabilitado; false se falhou */
     private boolean enviarSilencioso(String para, String assunto, String html) {
         if (!mailProperties.isEnabled()) {
-            log.info("[Email desabilitado] Assunto: {}", assunto);
-            return true;
+            log.info("[Email desabilitado] Para={} assunto={}", para, assunto);
+            return false;
         }
 
         if (mailProperties.isResend()) {
+            log.info("[Resend] Enviando para={} assunto={}", para, assunto);
             return resendEmailClient.enviar(para, assunto, html);
         }
 
         if (mailSender.isEmpty()) {
-            log.warn("[Email SMTP] JavaMailSender não configurado");
+            log.warn("[Email SMTP] JavaMailSender ausente — configure MAIL_USERNAME e MAIL_PASSWORD no Railway");
+            return false;
+        }
+
+        if (mailProperties.getFrom() == null || mailProperties.getFrom().isBlank()) {
+            log.warn("[Email SMTP] MAIL_FROM não configurado");
             return false;
         }
 
         try {
+            log.info("[SMTP] Enviando para={} de={} assunto={}", para, mailProperties.getFrom(), assunto);
             MimeMessage message = mailSender.get().createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
             helper.setFrom(mailProperties.getFrom());
@@ -138,10 +146,11 @@ public class EmailService {
             helper.setSubject(assunto);
             helper.setText(html, true);
             mailSender.get().send(message);
-            log.info("[SMTP] E-mail enviado");
+            log.info("[SMTP] E-mail enviado para {}", para);
             return true;
-        } catch (MessagingException e) {
-            log.error("[SMTP] Falha ao enviar e-mail: {}", e.getMessage());
+        } catch (MessagingException | MailException e) {
+            log.error("[SMTP] Falha para {}: {} — confira MAIL_FROM=MAIL_USERNAME e senha de app Google",
+                    para, e.getMessage(), e);
             return false;
         }
     }

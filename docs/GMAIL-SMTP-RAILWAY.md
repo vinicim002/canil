@@ -57,7 +57,35 @@ Logs Railway: `[SMTP] E-mail enviado`
 
 ---
 
-## 4. Problemas comuns
+## 4. E-mail de agendamento de visita
+
+O site salva em `visita_agendamentos`, mas o e-mail só sai se **todas** estiverem true/configuradas:
+
+```env
+MAIL_ENABLED=true
+VISITA_NOTIFICAR_EMAIL=true
+MAIL_PROVIDER=smtp
+MAIL_USERNAME=...
+MAIL_PASSWORD=...
+MAIL_FROM=mesmo@gmail.com
+```
+
+Nos logs Railway após agendar:
+
+| Log | Significado |
+|-----|-------------|
+| `[Email visita] Desabilitado` | Falta `VISITA_NOTIFICAR_EMAIL=true` |
+| `[Email desabilitado]` | Falta `MAIL_ENABLED=true` |
+| `[Email SMTP] JavaMailSender ausente` | Falta `MAIL_USERNAME` / `MAIL_PASSWORD` |
+| `[SMTP] E-mail enviado para` | OK |
+| `[SMTP] Falha para` | Senha de app ou `MAIL_FROM` errado |
+| Stack trace enorme no POST | Gmail rejeitou envio — veja linha `[SMTP] Falha` acima |
+
+**Gmail:** `MAIL_FROM` deve ser o **mesmo** e-mail de `MAIL_USERNAME`.
+
+---
+
+## 5. Problemas comuns
 
 | Erro | Solução |
 |------|---------|
@@ -69,6 +97,6 @@ Logs Railway: `[SMTP] E-mail enviado`
 
 ---
 
-## 5. Depois (opcional)
+## 6. Depois (opcional)
 
 Quando tiver domínio, migre para Resend: [RESEND.md](./RESEND.md) (`MAIL_PROVIDER=resend`).
