@@ -43,7 +43,10 @@ public class EvolutionMessagingService {
             return;
         }
 
-        String base = evolutionProperties.getBaseUrl().replaceAll("/$", "");
+        String base = resolveBaseUrl();
+        if (base == null) {
+            return;
+        }
         String instance = evolutionProperties.getInstanceName();
 
         try {
@@ -63,6 +66,8 @@ public class EvolutionMessagingService {
                     .toBodilessEntity();
 
             log.info("[Evolution] Texto enviado para {}", telefoneWhatsApp);
+        } catch (IllegalArgumentException e) {
+            log.error("[Evolution] URL inválida (EVOLUTION_BASE_URL): {}", evolutionProperties.getBaseUrl());
         } catch (RestClientException e) {
             log.error("[Evolution] Falha ao enviar para {}: {}", telefoneWhatsApp, e.getMessage());
         }
@@ -79,7 +84,10 @@ public class EvolutionMessagingService {
             return;
         }
 
-        String base = evolutionProperties.getBaseUrl().replaceAll("/$", "");
+        String base = resolveBaseUrl();
+        if (base == null) {
+            return;
+        }
         String instance = evolutionProperties.getInstanceName();
 
         try {
@@ -102,9 +110,26 @@ public class EvolutionMessagingService {
                     .toBodilessEntity();
 
             log.info("[Evolution] PDF filhote enviado para {}", resposta.telefoneWhatsApp());
+        } catch (IllegalArgumentException e) {
+            log.error("[Evolution] URL inválida (EVOLUTION_BASE_URL): {}", evolutionProperties.getBaseUrl());
         } catch (RestClientException e) {
             log.error("[Evolution] Falha ao enviar filhote para {}: {}", resposta.telefoneWhatsApp(), e.getMessage());
         }
+    }
+
+    private String resolveBaseUrl() {
+        String raw = evolutionProperties.getBaseUrl();
+        if (raw == null || raw.isBlank()) {
+            log.error(
+                    "[Evolution] EVOLUTION_BASE_URL não configurada. Ex.: https://evolution-api-production-6e8f.up.railway.app"
+            );
+            return null;
+        }
+        String trimmed = raw.trim();
+        if (!trimmed.startsWith("http://") && !trimmed.startsWith("https://")) {
+            trimmed = "https://" + trimmed;
+        }
+        return trimmed.replaceAll("/$", "");
     }
 
     private RestClient restClient() {
