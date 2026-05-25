@@ -154,10 +154,24 @@ O `frontend/vercel.json` configura SPA fallback (`/*` → `index.html`).
 
 ## 6. Resend (e-mail)
 
+Guia detalhado: **[docs/RESEND.md](./RESEND.md)**
+
 1. Criar conta em [resend.com](https://resend.com)
 2. Verificar domínio (SPF, DKIM, DMARC)
 3. `MAIL_FROM` deve usar domínio verificado
 4. `RESEND_API_KEY` no Railway
+
+Variáveis mínimas:
+
+```env
+MAIL_ENABLED=true
+MAIL_PROVIDER=resend
+RESEND_API_KEY=re_...
+MAIL_FROM=Canil <noreply@seudominio.com>
+MAIL_ADMIN=admin@seudominio.com
+MAIL_SITE_URL=https://canil-sooty.vercel.app
+VISITA_NOTIFICAR_EMAIL=true
+```
 
 ---
 
