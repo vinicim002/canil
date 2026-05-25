@@ -2,6 +2,10 @@
 
 Envio de e-mail **sem domínio próprio**, usando sua conta Google.
 
+> **Atenção:** o Railway costuma **bloquear saída SMTP** (`smtp.gmail.com:587` / `:465`).
+> Erro típico: `ConnectException: Operation timed out` ou `MailConnectException`.
+> Nesse caso **Gmail SMTP não funciona** no backend em produção — use **[Resend](./RESEND.md)** (`MAIL_PROVIDER=resend`), que usa HTTPS e não é bloqueado.
+
 ---
 
 ## 1. Senha de app do Google
@@ -94,6 +98,7 @@ Nos logs Railway após agendar:
 | `[Email desabilitado]` | `MAIL_ENABLED=false` |
 | E-mail na spam | Normal com Gmail; peça para marcar como não spam |
 | `535-5.7.8` | Conta Google bloqueou — gere nova senha de app |
+| `Operation timed out` em `smtp.gmail.com:587` | **Railway bloqueia SMTP** → migre para Resend |
 
 ---
 

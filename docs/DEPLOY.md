@@ -152,9 +152,13 @@ O `frontend/vercel.json` configura SPA fallback (`/*` → `index.html`).
 
 ---
 
-## 6. Resend (e-mail)
+## 6. E-mail em produção (Railway)
 
-Guia detalhado: **[docs/RESEND.md](./RESEND.md)**
+O Railway **bloqueia SMTP** (porta 587/465). Gmail SMTP funciona em **dev local**, não no deploy.
+
+**Use Resend na produção** — guia: **[docs/RESEND.md](./RESEND.md)**
+
+Gmail SMTP local / VPS: **[docs/GMAIL-SMTP-RAILWAY.md](./GMAIL-SMTP-RAILWAY.md)** (só se não houver timeout de rede)
 
 1. Criar conta em [resend.com](https://resend.com)
 2. Verificar domínio (SPF, DKIM, DMARC)
