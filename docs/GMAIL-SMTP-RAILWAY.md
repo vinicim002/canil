@@ -35,6 +35,8 @@ MAIL_USERNAME=seu@gmail.com
 MAIL_PASSWORD=abcdefghijklmnop
 ```
 
+> Se `VISITA_NOTIFICAR_EMAIL` estiver ausente, o backend usa o mesmo valor de `MAIL_ENABLED` (após redeploy com a property atualizada).
+
 - `MAIL_PASSWORD`: senha de app **sem espaços** (ou com espaços — o Spring aceita os dois formatos na maioria dos casos; se falhar, remova espaços)
 - `MAIL_FROM` e `MAIL_USERNAME`: **mesmo** e-mail Gmail
 - **Não** defina `RESEND_API_KEY` nem `MAIL_PROVIDER=resend`

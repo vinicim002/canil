@@ -13,6 +13,7 @@ import com.vinicius.backend.infrastructure.n8n.VisitaNotificacaoService;
 import com.vinicius.backend.shared.exception.BusinessException;
 import com.vinicius.backend.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class VisitaService {
@@ -66,6 +68,7 @@ public class VisitaService {
                 .build();
 
         VisitaAgendamento salva = visitaRepository.save(visita);
+        log.info("[Visita] Agendada id={} email={} dataHora={}", salva.getId(), salva.getEmail(), salva.getDataHora());
         visitaNotificacaoService.disparar(TipoEventoVisita.VISITA_CRIADA, salva);
         return visitaMapper.toResponse(salva);
     }
