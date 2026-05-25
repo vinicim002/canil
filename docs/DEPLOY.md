@@ -144,11 +144,14 @@ O `frontend/vercel.json` configura SPA fallback (`/*` → `index.html`).
 
 ---
 
-## 5. Evolution API
+## 5. Evolution API (WhatsApp)
 
-- Banco PostgreSQL **dedicado** (Railway ou Docker)
-- `CANIL_DOCS_BASE_URL` = URL pública da API (PDFs no WhatsApp)
-- Webhook Evolution → n8n → backend
+Guia completo: **[docs/EVOLUTION-PROD.md](./EVOLUTION-PROD.md)**
+
+- Serviço **separado** no Railway (imagem `evoapicloud/evolution-api:v2.3.7` + Postgres + volume)
+- `EVOLUTION_BASE_URL` = URL pública HTTPS
+- Webhook Evolution → [n8n Cloud](./N8N-CLOUD.md) → backend
+- `CANIL_DOCS_BASE_URL` = `https://canil-production.up.railway.app` (PDF filhotes)
 
 ---
 

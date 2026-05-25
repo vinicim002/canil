@@ -93,28 +93,25 @@ https://vinicim003.app.n8n.cloud/webhook/canil-whatsapp-mensagens
 
 ## 5. Evolution API (WhatsApp)
 
-O n8n Cloud **não** alcança `localhost` nem `evolution-api` do Docker.
+O n8n Cloud **não** alcança `localhost`. Deploy da Evolution: **[EVOLUTION-PROD.md](./EVOLUTION-PROD.md)**.
 
-Você precisa de Evolution em URL pública, por exemplo:
-
-- Outro serviço no Railway, ou
-- VPS / Docker com domínio HTTPS
-
-No Railway (quando tiver Evolution):
+Resumo no backend:
 
 ```env
 EVOLUTION_ENABLED=true
 EVOLUTION_BASE_URL=https://sua-evolution.railway.app
-EVOLUTION_API_KEY=<api key da instância>
+EVOLUTION_API_KEY=<api key>
 EVOLUTION_INSTANCE=canil
+N8N_VISITA_VIA_EVOLUTION=true
+CANIL_DOCS_BASE_URL=https://canil-production.up.railway.app
 ```
 
-No n8n, nó **Evolution WhatsApp** do workflow de eventos:
+Webhook mensagens recebidas (no seu PC, após Evolution no ar):
 
-```
-POST https://sua-evolution.railway.app/message/sendText/canil
-Header: apikey: <EVOLUTION_API_KEY>
-Body: { "number": "...", "text": "..." }
+```bash
+EVOLUTION_API_URL=https://sua-evolution.railway.app \
+N8N_WEBHOOK_URL=https://vinicim003.app.n8n.cloud/webhook/canil-whatsapp-mensagens \
+./scripts/evolution-webhook-prod.sh
 ```
 
 ---
